@@ -3339,3 +3339,23 @@ input, select, textarea {
 			}
 
 	}
+
+/* Banner headshot replacing "Tell Me More" button */
+#banner .headshot-link {
+  display: inline-block;
+}
+
+#banner img.headshot {
+  width: 140px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 999px; /* circle */
+  border: 3px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#banner .headshot-link:hover img.headshot {
+  transform: scale(1.03);
+  box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.45);
+}
