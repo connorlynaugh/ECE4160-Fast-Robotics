@@ -3346,8 +3346,8 @@ input, select, textarea {
 }
 
 #banner img.headshot {
-  width: 90px;
-  height: 90px;
+  width: 100px;
+  height: 100px;
   object-fit: cover;
   border-radius: 999px; /* circle */
   border: 3px solid rgba(255, 255, 255, 0.8);
