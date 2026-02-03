@@ -11,12 +11,109 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="stylesheet" href="assets/css/main.css" />
 		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+
+	<style>
+	:root{
+	/* Media sizing: full width again */
+	--media-min: 0px;
+	--media-ideal: 100%;
+	--media-max: 100%;
+
+	--media-gap: 1.25rem;
+	--media-bottom: 2.25rem;
+	--section-gap: 3rem;
+	}
+
+	/* Inline code look */
+	code.inline {
+		background: rgba(0,0,0,0.06);
+		padding: 0.1em 0.3em;
+		border-radius: 4px;
+	}
+
+	/* ====== PROFESSIONAL HEADERS ====== */
+	#main .content h3 {
+		font-size: 2.0em;
+		font-weight: 800;
+		letter-spacing: 0.02em;
+		margin-top: var(--section-gap);
+		margin-bottom: 0.75rem;
+	}
+
+	#main .content h4 {
+		font-size: 1.35em;
+		font-weight: 750;
+		margin-top: 2.25rem;
+		margin-bottom: 0.6rem;
+	}
+
+	/* Better anchor-jump positioning (so headers aren’t hidden under top nav) */
+	#main .content h3[id],
+	#main .content h4[id] {
+		scroll-margin-top: 95px;
+	}
+
+	/* Make section separators breathe more */
+	#main .content hr {
+		margin: 3rem 0;
+	}
+
+	/* ====== SMALLER, NICER IMAGES ====== */
+	#main .content span.image.fit{
+	display:block;
+	width:100%;
+	max-width: var(--media-max);
+	margin: var(--media-gap) auto var(--media-bottom) auto;
+	}
+
+	#main .content span.image.fit img {
+		width: 100%;
+		height: auto;
+	}
+
+	/* Extra spacing if images are back-to-back */
+	#main .content span.image.fit + span.image.fit {
+		margin-top: calc(var(--media-gap) * 1.4);
+	}
+
+	/* ====== SMALLER, NICER VIDEOS ====== */
+	.video-container{
+	position: relative;
+	width: 100%;
+	max-width: var(--media-max);
+	margin: var(--media-gap) auto var(--media-bottom) auto;
+	padding-bottom: 56.25%;
+	height: 0;
+	overflow: hidden;
+	border-radius: 10px;
+	}
+
+	.video-container iframe {
+		position: absolute;
+		top: 0; left: 0;
+		width: 100%;
+		height: 100%;
+		border: 0;
+	}
+
+	/* Extra spacing if a video is followed by an image (or another video) */
+	.video-container + .video-container,
+	.video-container + span.image.fit,
+	span.image.fit + .video-container {
+		margin-top: calc(var(--media-gap) * 1.4);
+	}
+
+	/* Optional: use this class when you WANT a larger image/video */
+	.media-wide {
+		max-width: 900px !important;
+	}
+	</style>
+
 	</head>
 
 	<body class="no-sidebar is-preload">
 		<div id="page-wrapper">
 
-			<!-- Header -->
 			<header id="header">
 				<h1 id="logo"><a href="index.html">Fast Robotics <span>Spring 2026</span></a></h1>
 				<nav id="nav">
@@ -27,7 +124,6 @@
 				</nav>
 			</header>
 
-			<!-- Main -->
 			<article id="main">
 
 				<header class="special container">
@@ -40,34 +136,35 @@
 				</header>
 
 				<section class="wrapper style4 container">
-
 					<div class="content">
 						<section>
 
-							<!-- Table of Contents -->
 							<section class="box">
 								<header>
 									<h3>Table of Contents</h3>
 								</header>
-
 								<ul class="alt">
 									<li><a class="scrolly" href="#overview">Overview</a></li>
+
 									<li>
 										<a class="scrolly" href="#lab1a">Lab 1A</a>
 										<ul style="margin: 0.5em 0 0 1.25em;">
+											<li><a class="scrolly" href="#prelab1a">Prelab 1A</a></li>
 											<li><a class="scrolly" href="#blink">Blink</a></li>
 											<li><a class="scrolly" href="#serial">Serial</a></li>
 											<li><a class="scrolly" href="#temperature">Temperature</a></li>
 											<li><a class="scrolly" href="#microphone">Microphone</a></li>
 										</ul>
 									</li>
+
 									<li>
 										<a class="scrolly" href="#lab1b">Lab 1B</a>
 										<ul style="margin: 0.5em 0 0 1.25em;">
-											<li><a class="scrolly" href="#prelab">Prelab</a></li>
+											<li><a class="scrolly" href="#prelab1b">Prelab 1B</a></li>
 											<li><a class="scrolly" href="#labtasks">Lab Tasks</a></li>
 										</ul>
 									</li>
+
 									<li><a class="scrolly" href="#reflection">Reflection</a></li>
 									<li><a class="scrolly" href="#acknowledgements">Acknowledgements</a></li>
 								</ul>
@@ -75,277 +172,281 @@
 
 							<hr />
 
-							<!-- Overview -->
 							<header>
 								<h3 id="overview">Overview</h3>
 							</header>
 							<p>
-								In this lab, we first set up the SparkFun RedBoard Artemis Nano, working on its integration
-								with the Arduino IDE and Bluetooth Low Energy (BLE) communication capabilities.
+								This lab was the first setup stage for the Sparkfun Artemis. This included programming the SparkFun RedBoard Artemis Nano
+								in the Arduino IDE and then building a reliable BLE “debug channel” between the Artemis and my laptop
+								using the provided Python/Jupyter framework. By the end of the lab I could run basic board examples, send structured commands from Python to the Artemis, and stream timestamped and temperature-tagged
+								data back over BLE in a format that is easy to parse.
 							</p>
 
 							<hr />
 
-							<!-- Lab 1A -->
 							<header>
 								<h3 id="lab1a">Lab 1A</h3>
 							</header>
 
-							<h4 id="blink">Prelab 1A</h4>
+							<h4 id="prelab1a">Prelab 1A</h4>
 							<p>
-								For the prelab, I set up the Arduino IDE to specifically recognize and integrate with the 
-								Sparkfun Appollo3 boards, including the Redboard Artemis Nano. An issue I experienced when 
-								attempting serial communication was that my bootloader was unable to connect as a Macbook Pro
-								user. This issue was resolved by following the provided instructions to update the CH340 Driver.
-								Upon updating the upload settings and updating the SVL bootloader software everything was working.
+								I installed the Arduino IDE and added the SparkFun Apollo3 board package so the IDE could recognize the
+								RedBoard Artemis Nano. On macOS I initially ran into a bootloader/serial upload issue, which ended up being
+								a driver problem. After updating the CH340 driver and confirming the correct board and port selection, uploads
+								and serial output worked consistently. From that point onward I kept my serial baud rate aligned with the
+								examples and verified each step using serial monitor output and simple visible behaviors (like the onboard LED).
 							</p>
 
-							<!-- Insert Video -->
-							<span class="image fit">
-								<img src="images/lab1/Blink" alt="Blink example" />
-							</span>
+							<hr />
 
 							<h4 id="blink">Blink</h4>
 							<p>
-								I started with the example “Blink” program to confirm that I could successfully program
-								the board and control the on-board LED.
+								I started with the standard Blink example to confirm that the toolchain was actually
+								programming the board and that I could control the onboard LED. This was my “sanity check” before moving on to
+								sensor and communication examples.
 							</p>
 
-							<span class="image fit">
-								<img src="images/lab1/Echo.jpg" alt="Echo example" />
-							</span>
+							<p>
+								The youtube reel displays this properly flashing the onboard LED.
+							</p>
+
+							<!-- Blink Short -->
+							<div class="video-container">
+								<iframe
+									src="https://www.youtube-nocookie.com/embed/-seWNS9Mi8M?rel=0&modestbranding=1&playsinline=1"
+									title="Blink Demo"
+									allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+									referrerpolicy="strict-origin-when-cross-origin"
+									allowfullscreen></iframe>
+							</div>
 
 							<h4 id="serial">Serial</h4>
 							<p>
-								After verifying basic programming functionality, I used the “Serial” example to test data
-								communication between the board and a serial monitor, ensuring that input data was correctly
-								echoed back. 115200 was the correct baud rate for me to communicate. 
+								Next I ran SparkFun’s serial example to verify two-way USB serial communication. The key detail for my setup was
+								using 115200 baud so the monitor output was readable and input echo behavior matched
+								expectations. Once this was working, it became my main debugging tool while I iterated on BLE in Lab 1B.
 							</p>
 
-							<!-- Image (update src to match your repo) -->
 							<span class="image fit">
-								<img src="images/lab1/Temperatures.jpg" alt="Temperature example" />
+								<img src="images/lab1/Echo.png" alt="Blink / LED example evidence" />
 							</span>
 
 							<h4 id="temperature">Temperature</h4>
 							<p>
-								The “Analog Read” example demonstrated that sensor data, specifically from the temperature
-								sensor, could be collected. This takes full advantage of the on chip analog to digital converter. 
-								If the chip was help the temperature was seen increasing over time.
+								I then tested the ADC-based temperature reading example. The goal here was not absolute accuracy but verifying that
+								the board could sample a real sensor and that readings changed with a physical stimulus. Touching the chip and waiting a
+								moment produced a noticeable increase in measured temperature, which confirmed the sensor was behaving as expected.
 							</p>
 
-							<!-- VIDEO -->
 							<span class="image fit">
-								<img src="images/lab1/Microphone" alt="Microphone example" />
+								<img src="images/lab1/Temperatures.png" alt="Serial monitor output / echo behavior" />
 							</span>
 
 							<h4 id="microphone">Microphone</h4>
 							<p>
-								The “Microphone” example showed how I could access and process microphone data
-								for frequency analysis. Upon speaking or whistling, higher frequency content was recorded.
+								Finally I ran the Pulse Density Modulation (PDM) microphone output example to confirm microphone sampling and frequency content extraction.
+								When I spoke or whistled near the board, the dominant frequency content shifted upward. This also gave me confidence that higher-rate streaming data would be feasible later
+								in the course.
 							</p>
 
-							<span class="image fit">
-								<img src="images/lab1/Micvideo.png" alt="Microphone example screenshot" />
-							</span>
+							<p>
+								This youtube reel displays this how the frequency content changes while speaking.
+							</p>
+
+							<div class="video-container">
+								<iframe
+									src="https://www.youtube-nocookie.com/embed/Ue5I-JnAfjk?rel=0&modestbranding=1&playsinline=1"
+									title="Microphone Demo"
+									allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+									referrerpolicy="strict-origin-when-cross-origin"
+									allowfullscreen></iframe>
+							</div>
 
 							<hr />
 
-							<!-- Lab 1B -->
 							<header>
 								<h3 id="lab1b">Lab 1B</h3>
 							</header>
 
-							<h4 id="prelab">Prelab</h4>
+							<h4 id="prelab1b">Prelab 1B</h4>
 							<p>
-								In this section, I focused on establishing Bluetooth Low Energy (BLE) communication with the Artemis
-								board using the ArduinoBLE library. I interfaced with it using Python via the bleak module, which required
-								setting up a virtual environment and installing the necessary packages. In order to begin this lab I first had to install
-								python and the necessary packages to start a virtual environment from my laptop. I then unzipped the provided source code and 
-								organized it locally onto my desktop. I then became familiar with the codebase using the linked Jupyter Notebook.
+								For BLE, I set up a dedicated Python virtual environment and ran the course Jupyter notebook workflow.
+								It is organized such that Python writes a command string to a writable RX characteristic, the Artemis
+								parses it and responds by updating a TX string.
+							</p>
+							<p>
+								In my Arduino sketch, I changed the custom service UUID. On the Python side, the controller loads the MAC address and UUIDs
+								from connections.yaml.
 							</p>
 
 							<span class="image fit">
-								<img src="images/lab1/Mac.png" alt="Mac Address example screenshot" />
+								<img src="images/lab1/Mac.png" alt="MAC address / connections config evidence" />
 							</span>
 
 							<p>
-								To enable BLE communication, I first identified the board’s unique MAC Address using the ble_arduino.ino sketch.
-								This MAC Address was then updated in connections.yaml to establish a proper connection.
+								I also generated a unique BLE service UUID to avoid accidentally connecting to a nearby board advertising the default UUID.
 							</p>
-
-							
-
-							<span class="image fit">
-								<img src="images/lab1/connections.png" alt="connections.yaml update" />
-							</span>
-
 							<p>
-								Additionally, I generated a UUID for the Bluetooth service using Python:
-								#define BLE_UUID_TEST_SERVICE "772587a5-ad3b-4905-a21a-ee5d1d3ee220"
-							</p>
-
-							<p>
-								After updating both connections.yaml and ble_arduino.ino, I was able to establish a BLE connection using helper
-								functions provided by the course libraries. I had a lot of issues in this part and had to double check my python
-								installations. Then I realized my bluetooth was not on :/. That solved my issues.
+								The generated UUID: "772587a5-ad3b-4905-a21a-ee5d1d3ee220"
 							</p>
 
 							<hr />
 
-							<!-- Lab Tasks -->
 							<header>
 								<h3 id="labtasks">Lab Tasks</h3>
 							</header>
-							
-							<span class="image fit">
-								<img src="images/lab1/EchoArduino.png" alt="Echo Arduino" />
-							</span>
-
-							<span class="image fit">
-								<img src="images/lab1/Hello.png" alt="HiHello" />
-							</span>
 
 							<h4 id="echo">1. Echo</h4>
 							<p>
-								The ECHO command receives a string from the Python Juypter Notebook, modifies it, and returns the altered string. The modified string
-								is also printed via serial output and adds additional text to the provided string.
+								I implemented ECHO by reading a string argument from the command payload, then sending back an
+								augmented response through the notify TX string characteristic. In my implementation I used the provided EString
+								helper so I could safely build a C-string without manual buffer management.
 							</p>
-
 							<span class="image fit">
-								<img src="images/lab1/send3Arduino.png" alt="Send 3 Float Arduino" />
+								<img src="images/lab1/EchoArduino.png" alt="Echo Arduino case" />
 							</span>
-
+							<p>
+								Here the arduino added "Robot says ->" and ":)".
+							</p>
 							<span class="image fit">
-								<img src="images/lab1/send3Python.png" alt="Send 3 Float Python" />
-							</span>
-
-							<span class="image fit">
-								<img src="images/lab1/send3Results.png" alt="Send 3 Float Results" />
+								<img src="images/lab1/Hello.png" alt="Echo Python output" />
 							</span>
 
 							<h4 id="send-three-floats">2. Send Three Floats</h4>
 							<p>
-								The SEND_THREE_FLOATS command functions similarly to ECHO, but it processes three float arguments instead of a single
-								string. The code I wrote was based on and partially copied from the example command SEND_TWO_INTS.
+								For SEND_THREE_FLOATS, I extended the parsing pattern used in the course’s two-integer example.
+								The Artemis uses RobotCommand.get_next_value() to extract three float values in sequence and then
+								prints them to the serial monitor for verification.
 							</p>
 
 							<span class="image fit">
-								<img src="images/lab1/GetTimeArduino.png" alt="Get Time Arduino" />
+								<img src="images/lab1/send3Arduino.png" alt="Send three floats Arduino" />
 							</span>
-
+							<p>
+								Here I send 6.0 7.0 and 8.0 and the respective results are shown below.
+							</p>
 							<span class="image fit">
-								<img src="images/lab1/GetTimePython.png" alt="Get Time Python" />
+								<img src="images/lab1/send3Python.png" alt="Send three floats Python" />
+							</span>
+							<span class="image fit">
+								<img src="images/lab1/send3Result.png" alt="Send three floats results" />
 							</span>
 
 							<h4 id="get-time-millis">3. Get Time Millis</h4>
 							<p>
-								The GET_TIME_MILLIS command returns the current time in the format T:123456, obtained using the millis() function which 
-								requires casting to append to the RX string. Otherwise it returns a long unsigned int.
+								I added GET_TIME_MILLIS to return a timestamp formatted as T:&lt;millis&gt;
+								I intentionally kept the payload short and easy to parse on the Python side.
 							</p>
 
 							<span class="image fit">
-								<img src="images/lab1/NotificationHandler.png" alt="NotificationHandler" />
+								<img src="images/lab1/GetTimeArduino.png" alt="GET_TIME_MILLIS Arduino" />
 							</span>
-
+							<p>
+								This yielded the proper response show in Jupyter.
+							</p>
 							<span class="image fit">
-								<img src="images/lab1/UpdatedTimeHandler.png" alt="UpdatedTimeHandler.png" />
+								<img src="images/lab1/GetTimePython.png" alt="GET_TIME_MILLIS Python" />
 							</span>
 
 							<h4 id="notification-handler">4. Notification Handler</h4>
 							<p>
-								To parse the data being sent appropriately (and also follow lab instructions), I implemented a notification handler.
-								I originally wrote much more complicated code, but then revised it after adding steps 6 and 7 to be a little more simpler.
+								On the Python side I used a notification callback in ble.py to asynchronously receive TX string updates. I simply splice the passed string and add the time values to a growing array.
 							</p>
 
 							<span class="image fit">
-								<img src="images/lab1/TimeLoopArduino.png" alt="TimeLoop.png" />
+								<img src="images/lab1/NotificationHandler.png" alt="Notification handler code" />
 							</span>
-
+							<p>
+								I later updated this to include temperature data and possibly more iterable data in the future. For temperature packets,
+								my Arduino sends strings formatted as T:&lt;ms&gt; F:&lt;degF&gt;, so the handler splits at the first space
+								and stores time and temperature into separate lists.
+							</p>
 							<span class="image fit">
-								<img src="images/lab1/TimeLoopPython.png" alt="TimeLoop.png" />
+								<img src="images/lab1/UpdatedTimeHandler.png" alt="Updated handler parsing" />
 							</span>
 
 							<h4 id="time-loop">5. TIME_LOOP</h4>
 							<p>
-								The TIME_LOOP repeatedly records the current time for a period of 5 seconds. 
-								This is used to measure the amount of messages that can be sent from the artemis nano to my computer in a given time frame.
+								TIME_LOOP repeatedly publishes timestamps for 5 seconds using BLE notifications.
+								I used the number of notifications received over that window to estimate the maximum sustained message rate.
+								My measured rate was 24 messages/sec.
 							</p>
 
 							<span class="image fit">
-								<img src="images/lab1/SendTimeDataArduino.png" alt="SendTimeDataArduino.png" />
+								<img src="images/lab1/TimeLoopArduino.png" alt="TIME_LOOP Arduino" />
 							</span>
-
 							<span class="image fit">
-								<img src="images/lab1/SendTimeDataPython.png" alt="SendTimeDataPython.png" />
+								<img src="images/lab1/TimeLoopPython.png" alt="TIME_LOOP Python results" />
 							</span>
 
 							<h4 id="send-time-data">6. SEND_TIME_DATA</h4>
 							<p>
-								I then wrote a command SEND_TIME_DATA that sent the time data back.
+								In SEND_TIME_DATA, I switched from measure and transmit immediately to measure locally, then transmit.
+								The Artemis stores timestamps into a fixed-size global array (length 500), then transmits the buffered samples back to the laptop.
+								This pattern is useful when you want sampling to be less coupled to BLE latency.
 							</p>
 
 							<span class="image fit">
-								<img src="images/lab1/GetTempArduino.png" alt="GetTempArduino.png" />
+								<img src="images/lab1/SendTimeDataArduino.png" alt="SEND_TIME_DATA Arduino" />
 							</span>
-
 							<span class="image fit">
-								<img src="images/lab1/GetTempPython.png" alt="GetTempPython.png" />
-							</span>
-
-							<span class="image fit">
-								<img src="images/lab1/GetTempOutput.png" alt="GetTempOutput.png" />
+								<img src="images/lab1/SendTimeDataPython.png" alt="SEND_TIME_DATA Python" />
 							</span>
 
 							<h4 id="get-temp-readings">7. GET_TEMP_READINGS</h4>
 							<p>
-								I wrote GET_TEMP_READINGS that records both time and temperature and can be easily parsed.
-								My notification handler broke when I added SEND_TEMP_DATA and GET_TEMP_READINGS, so I went back to reevaluate it as it
-								was repeating weirdly. While I never figured out exactly what it was, I simplified it and redid it to print general statements.
+								Finally, GET_TEMP_READINGS records paired samples of time and temperature into two aligned arrays.
+								Each index corresponds to a single measurement instant. After the capture window, the Artemis sends strings back in the format
+								T:&lt;ms&gt; F:&lt;degF&gt;, which the Python handler parses into times and temps lists.
 							</p>
 
-							<h4 id="lab-question">8. Lab Question</h4>
+							<span class="image fit">
+								<img src="images/lab1/GetTempArduino.png" alt="GET_TEMP_READINGS Arduino" />
+							</span>
+							<span class="image fit">
+								<img src="images/lab1/GetTempPython.png" alt="GET_TEMP_READINGS Python" />
+							</span>
+							<span class="image fit">
+								<img src="images/lab1/GetTempOutput.png" alt="GET_TEMP_READINGS output" />
+							</span>
+
+							<h4 id="lab-question">8. Discussion: incremental vs buffered sampling</h4>
 							<p>
-								I have two methods to collect and store data: incrementally using GET_TIME_MILLIS or in batches with the note and send
-								data commands. Each approach has its own advantages and disadvantages. Using GET_TIME_MILLIS introduces significant delays
-								between readings due to BLE communication, whereas recording data in batches runs in a loop on the Artemis, bypassing BLE
-								latency and allowing for much faster iterations.
+								The “incremental” approach (requesting GET_TIME_MILLIS repeatedly) is simple and gives immediate feedback,
+								which is helpful while debugging. The downside is that BLE round-trip time dominates the sampling interval, so the effective
+								sampling rate is relatively low. This is not ture on the flipside where all measurements are done upfront.
 							</p>
 							<p>
-								With GET_TIME_MILLIS, I receive immediate feedback from sensors, which can be useful for debugging, while recording data
-								in batches and sending it later introduces a delay between the initial request and data reception. In terms of storage,
-								GET_TIME_MILLIS requires minimal, temporary storage to collect and send data immediately, but batch storage necessitates
-								storing all data first, demanding significantly more memory.
+								The buffered approach (recording arrays locally, then sending the array) seperates sampling speed from BLE latency.
+								Sampling in a tight loop on the Artemis can be much faster and more consistent, but it costs RAM and delays feedback until the array is sent.
+								In my implementation, arrays are fixed-size (500 samples), which keeps memory use predictable.
 							</p>
 							<p>
-								The approximate upper limit is 384kB of RAM; if I store only time (4B per reading), I can record up to 98,304 readings,
-								while storing both time and temperature cuts this to 49,152 readings. If storage becomes a limitation, I may need to repeat
-								batch recordings by overwriting previous data or reduce the sampling frequency to extend the data collection period.
+								For memory bounds: the Artemis has 384 kB RAM (~393,216 bytes). A timestamp-only buffer using 4-byte integers can store roughly
+								393,216 / 4 ≈ 98,304 samples. If I store both timestamp (4 bytes) and temperature float (4 bytes), the per-sample storage is ~8 bytes,
+								so the upper bound is about 49,152 paired samples (ignoring overhead from other variables and stack usage).
 							</p>
 
 							<hr />
 
-							<!-- Reflection -->
 							<header>
 								<h3 id="reflection">Reflection</h3>
 							</header>
 							<p>
-								Communication is crucial in order to figure out what is happening. This lab seemed to be focused on getting settled with
-								the board and establishing communication with it. I struggled with getting set up only to realize that my bluetooth was not on.
-								It also took me embarrassingly long to realize that I did not update my commands properly.
+								The biggest lesson from this lab was that “communications working” is not simple. Getting a connection is one problem but getting
+								reliable, parseable data at a useful rate is another. Most of my time went into small integration details (drivers, baud rate, matching UUIDs,
+								and making sure my Bluetooth was actually enabled). Once the pipeline was stable, the command-based architecture (RX command string +
+								TX notify string) made it straightforward to add new commands for future labs.
 							</p>
 
 							<hr />
 
-							<!-- Acknowledgements -->
 							<header>
 								<h3 id="acknowledgements">Acknowledgements</h3>
 							</header>
 							<p>
-								Thanks to all the staff and the professor for helping in lab. I referenced the webpages of past students: Mikayla Lahr,
-								Nidhi Sonwalkar, Kofi Ohene Adu, Minh Nguyen, and Daria Kot. I also had ChatGPT proof read this webpage and shorten my
-								writing in areas where I was too wordy. Shout out to Aidan McNay for sitting with me and teaching me about Sphinx and
-								helping me build a test repo for this class (before I publish to this actual page).
+								Thank you to the course staff for help during setup and debugging. I also referenced a few prior student pages to understand how
+								to present results clearly (Katarina Duric and Nita Kattimani). The use of ChatGPT was used to leverage html formatting including text, images, and video. AI also did a grammar check on my report since I did not type it up online.
 							</p>
 
 							<ul class="buttons">
@@ -359,7 +460,6 @@
 
 			</article>
 
-			<!-- Footer -->
 			<footer id="footer">
 				<ul class="copyright">
 					<li>&copy; Connor Lynaugh</li>
@@ -369,7 +469,6 @@
 
 		</div>
 
-		<!-- Scripts -->
 		<script src="assets/js/jquery.min.js"></script>
 		<script src="assets/js/jquery.dropotron.min.js"></script>
 		<script src="assets/js/jquery.scrolly.min.js"></script>
@@ -381,4 +480,3 @@
 
 	</body>
 </html>
-
