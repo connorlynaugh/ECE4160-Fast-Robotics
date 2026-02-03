@@ -80,8 +80,8 @@
 								<h3 id="overview">Overview</h3>
 							</header>
 							<p>
-								In this lab, we explored the SparkFun RedBoard Artemis Nano, focusing on its integration
-								with the Arduino IDE and Bluetooth Low Energy (BLE) communication.
+								In this lab, we first set up the SparkFun RedBoard Artemis Nano, working on its integration
+								with the Arduino IDE and Bluetooth Low Energy (BLE) communication capabilities.
 							</p>
 
 							<hr />
@@ -91,34 +91,58 @@
 								<h3 id="lab1a">Lab 1A</h3>
 							</header>
 
+							<h4 id="blink">Prelab 1A</h4>
+							<p>
+								For the prelab, I set up the Arduino IDE to specifically recognize and integrate with the 
+								Sparkfun Appollo3 boards, including the Redboard Artemis Nano. An issue I experienced when 
+								attempting serial communication was that my bootloader was unable to connect as a Macbook Pro
+								user. This issue was resolved by following the provided instructions to update the CH340 Driver.
+								Upon updating the upload settings and updating the SVL bootloader software everything was working.
+							</p>
+
+							<!-- Insert Video -->
+							<span class="image fit">
+								<img src="images/lab1/Blink" alt="Blink example" />
+							</span>
+
 							<h4 id="blink">Blink</h4>
 							<p>
 								I started with the example “Blink” program to confirm that I could successfully program
 								the board and control the on-board LED.
 							</p>
 
+							<span class="image fit">
+								<img src="images/lab1/Echo.jpg" alt="Echo example" />
+							</span>
+
 							<h4 id="serial">Serial</h4>
 							<p>
 								After verifying basic programming functionality, I used the “Serial” example to test data
 								communication between the board and a serial monitor, ensuring that input data was correctly
-								echoed back.
-							</p>
-
-							<h4 id="temperature">Temperature</h4>
-							<p>
-								The “Analog Read” example demonstrated that sensor data, specifically from the temperature
-								sensor, could be collected.
+								echoed back. 115200 was the correct baud rate for me to communicate. 
 							</p>
 
 							<!-- Image (update src to match your repo) -->
 							<span class="image fit">
-								<img src="images/lab1/IMG_20250212_072507066.jpg" alt="Temperature example" />
+								<img src="images/lab1/Temperatures.jpg" alt="Temperature example" />
+							</span>
+
+							<h4 id="temperature">Temperature</h4>
+							<p>
+								The “Analog Read” example demonstrated that sensor data, specifically from the temperature
+								sensor, could be collected. This takes full advantage of the on chip analog to digital converter. 
+								If the chip was help the temperature was seen increasing over time.
+							</p>
+
+							<!-- VIDEO -->
+							<span class="image fit">
+								<img src="images/lab1/Microphone" alt="Microphone example" />
 							</span>
 
 							<h4 id="microphone">Microphone</h4>
 							<p>
-								Additionally, the “Microphone” example showed how I could access and process microphone data
-								for frequency analysis. My video kept getting corrupted upon Youtube upload, so I took a screenshot instead.
+								The “Microphone” example showed how I could access and process microphone data
+								for frequency analysis. Upon speaking or whistling, higher frequency content was recorded.
 							</p>
 
 							<span class="image fit">
@@ -136,17 +160,21 @@
 							<p>
 								In this section, I focused on establishing Bluetooth Low Energy (BLE) communication with the Artemis
 								board using the ArduinoBLE library. I interfaced with it using Python via the bleak module, which required
-								setting up a virtual environment and installing the necessary packages:
+								setting up a virtual environment and installing the necessary packages. In order to begin this lab I first had to install
+								python and the necessary packages to start a virtual environment from my laptop. I then unzipped the provided source code and 
+								organized it locally onto my desktop. I then became familiar with the codebase using the linked Jupyter Notebook.
 							</p>
 
-							<pre><code>python3 -m venv FastRobots_ble
-.\FastRobots_ble\Scripts\activate
-pip install numpy pyyaml colorama nest_asyncio bleak jupyterlab</code></pre>
+							<span class="image fit">
+								<img src="images/lab1/Mac.png" alt="Mac Address example screenshot" />
+							</span>
 
 							<p>
 								To enable BLE communication, I first identified the board’s unique MAC Address using the ble_arduino.ino sketch.
 								This MAC Address was then updated in connections.yaml to establish a proper connection.
 							</p>
+
+							
 
 							<span class="image fit">
 								<img src="images/lab1/connections.png" alt="connections.yaml update" />
@@ -154,10 +182,8 @@ pip install numpy pyyaml colorama nest_asyncio bleak jupyterlab</code></pre>
 
 							<p>
 								Additionally, I generated a UUID for the Bluetooth service using Python:
+								#define BLE_UUID_TEST_SERVICE "772587a5-ad3b-4905-a21a-ee5d1d3ee220"
 							</p>
-
-							<pre><code>from uuid import uuid4
-uuid4()</code></pre>
 
 							<p>
 								After updating both connections.yaml and ble_arduino.ino, I was able to establish a BLE connection using helper
@@ -171,34 +197,32 @@ uuid4()</code></pre>
 							<header>
 								<h3 id="labtasks">Lab Tasks</h3>
 							</header>
+							
+							<span class="image fit">
+								<img src="images/lab1/EchoArduino.png" alt="Echo Arduino" />
+							</span>
+
+							<span class="image fit">
+								<img src="images/lab1/Hello.png" alt="HiHello" />
+							</span>
 
 							<h4 id="echo">1. Echo</h4>
 							<p>
-								The ECHO command receives a string from Python, modifies it, and returns the altered string. The modified string
-								is also printed via serial output and is kind of like an “echo”.
+								The ECHO command receives a string from the Python Juypter Notebook, modifies it, and returns the altered string. The modified string
+								is also printed via serial output and adds additional text to the provided string.
 							</p>
 
-							<h5>Case Statement for ECHO</h5>
-							<pre><code>case ECHO:
+							<span class="image fit">
+								<img src="images/lab1/send3Arduino.png" alt="Send 3 Float Arduino" />
+							</span>
 
-    char char_arr[MAX_MSG_SIZE];
+							<span class="image fit">
+								<img src="images/lab1/send3Python.png" alt="Send 3 Float Python" />
+							</span>
 
-    // Extract the next value from the command string as a character array
-    success = robot_cmd.get_next_value(char_arr);
-    if (!success)
-        return;
-
-    const char* val;
-
-    tx_estring_value.clear();
-    tx_estring_value.append(char_arr);
-    val = tx_estring_value.c_str();
-    tx_characteristic_string.writeValue(val);
-    Serial.print("Robot says -> ");
-    Serial.println(val);
-    break;</code></pre>
-
-							<p>See image below in section 2.</p>
+							<span class="image fit">
+								<img src="images/lab1/send3Results.png" alt="Send 3 Float Results" />
+							</span>
 
 							<h4 id="send-three-floats">2. Send Three Floats</h4>
 							<p>
@@ -206,65 +230,27 @@ uuid4()</code></pre>
 								string. The code I wrote was based on and partially copied from the example command SEND_TWO_INTS.
 							</p>
 
-							<h5>Case Statement for SEND_THREE_FLOATS</h5>
-							<pre><code>case SEND_THREE_FLOATS:
-    float float_a, float_b, float_c;
-
-    success = robot_cmd.get_next_value(float_a);
-    if (!success)
-        return;
-
-    success = robot_cmd.get_next_value(float_b);
-    if (!success)
-        return;
-
-    success = robot_cmd.get_next_value(float_c);
-    if (!success)
-        return;
-
-    Serial.print("Three Integers: ");
-    Serial.print(float_a);
-    Serial.print(", ");
-    Serial.println(float_b);
-    Serial.print(", ");
-    Serial.println(float_c);
-
-    break;</code></pre>
-
 							<span class="image fit">
-								<img src="images/lab1/echoand3valtogether.png" alt="Echo + three floats (python side)" />
+								<img src="images/lab1/GetTimeArduino.png" alt="Get Time Arduino" />
 							</span>
 
-							<p>
-								The photo above shows the inputs from the python side sending the commands. The photo below shows the serial monitor
-								showing that it received the commands.
-							</p>
-
 							<span class="image fit">
-								<img src="images/lab1/send3echo.png" alt="Serial monitor output for echo + three floats" />
+								<img src="images/lab1/GetTimePython.png" alt="Get Time Python" />
 							</span>
 
 							<h4 id="get-time-millis">3. Get Time Millis</h4>
 							<p>
-								The GET_TIME_MILLIS command returns the current time in the format T:123456, obtained using the millis() function.
+								The GET_TIME_MILLIS command returns the current time in the format T:123456, obtained using the millis() function which 
+								requires casting to append to the RX string. Otherwise it returns a long unsigned int.
 							</p>
 
-							<h5>Case Statement for GET_TIME_MILLIS</h5>
-							<pre><code>case GET_TIME_MILLIS:
-    /*
-      gets time
-    */
-    const char* time_val;
+							<span class="image fit">
+								<img src="images/lab1/NotificationHandler.png" alt="NotificationHandler" />
+							</span>
 
-    tx_estring_value.clear();
-    tx_estring_value.append("Time: ");
-    tx_estring_value.append((double)millis());
-    time_val = tx_estring_value.c_str();
-    tx_characteristic_string.writeValue(time_val);
-    Serial.println(time_val);
-    break;</code></pre>
-
-							<p>See image below in section 5.</p>
+							<span class="image fit">
+								<img src="images/lab1/UpdatedTimeHandler.png" alt="UpdatedTimeHandler.png" />
+							</span>
 
 							<h4 id="notification-handler">4. Notification Handler</h4>
 							<p>
@@ -272,97 +258,51 @@ uuid4()</code></pre>
 								I originally wrote much more complicated code, but then revised it after adding steps 6 and 7 to be a little more simpler.
 							</p>
 
-							<h5>Notification handler to record the time response (incoming_val / array_storage)</h5>
-							<pre><code>def notification_handler(uuid, byte_array):
-    global incoming_val, array_storage
-    incoming_val.append(ble.bytearray_to_string(byte_array)[:])
-    data = ble.bytearray_to_string(byte_array)
-    array_storage.append(data)
-    print(data)
-
-ble.start_notify(ble.uuid['RX_STRING'], notification_handler)
-
-# Send GET_TIME_MILLIS Command
-ble.send_command(CMD.GET_TIME_MILLIS, "")</code></pre>
-
-							<h4 id="get-time-millis-loop">5. GET_TIME_MILLIS_LOOP</h4>
-							<p>
-								THE GET_TIME_MILLIS_LOOP loops. This can be used to measure differences in time.
-							</p>
-
-							<pre><code>case GET_TIME_MILLIS_LOOP:
-    double t;
-    t = (double) millis();
-    while ((double)millis() - t < 1000) {
-        tx_estring_value.clear();
-        tx_estring_value.append("Time: ");
-        tx_estring_value.append((double)millis());
-        tx_characteristic_string.writeValue(tx_estring_value.c_str());
-    }
-    break;</code></pre>
-
 							<span class="image fit">
-								<img src="images/lab1/get_time_millis_and_loop.png" alt="GET_TIME_MILLIS_LOOP output" />
+								<img src="images/lab1/TimeLoopArduino.png" alt="TimeLoop.png" />
 							</span>
 
-							<p>The photo above shows the commands GET_TIME_MILLIS_LOOP being executed.</p>
+							<span class="image fit">
+								<img src="images/lab1/TimeLoopPython.png" alt="TimeLoop.png" />
+							</span>
+
+							<h4 id="time-loop">5. TIME_LOOP</h4>
+							<p>
+								The TIME_LOOP repeatedly records the current time for a period of 5 seconds. 
+								This is used to measure the amount of messages that can be sent from the artemis nano to my computer in a given time frame.
+							</p>
+
+							<span class="image fit">
+								<img src="images/lab1/SendTimeDataArduino.png" alt="SendTimeDataArduino.png" />
+							</span>
+
+							<span class="image fit">
+								<img src="images/lab1/SendTimeDataPython.png" alt="SendTimeDataPython.png" />
+							</span>
 
 							<h4 id="send-time-data">6. SEND_TIME_DATA</h4>
 							<p>
 								I then wrote a command SEND_TIME_DATA that sent the time data back.
 							</p>
 
-							<h5>Case Statements for SEND_TIME_DATA</h5>
-							<pre><code>case SEND_TIME_DATA:
-    float time_array[20];
-    for (int i = 0; i < 20; i++) {
-        time_array[i] = (float)millis();
-    }
-
-    for (int i = 0; i < 20; i++) {
-        tx_estring_value.clear();
-        tx_estring_value.append("Time: ");
-        tx_estring_value.append(time_array[i]);
-        tx_estring_value.append("s");
-        tx_characteristic_string.writeValue(tx_estring_value.c_str());
-    }
-    break;</code></pre>
-
 							<span class="image fit">
-								<img src="images/lab1/sendtimedata.png" alt="SEND_TIME_DATA output" />
+								<img src="images/lab1/GetTempArduino.png" alt="GetTempArduino.png" />
 							</span>
 
-							<p>The photo above shows the SEND_TIME_DATA command in action.</p>
+							<span class="image fit">
+								<img src="images/lab1/GetTempPython.png" alt="GetTempPython.png" />
+							</span>
+
+							<span class="image fit">
+								<img src="images/lab1/GetTempOutput.png" alt="GetTempOutput.png" />
+							</span>
 
 							<h4 id="get-temp-readings">7. GET_TEMP_READINGS</h4>
 							<p>
 								I wrote GET_TEMP_READINGS that records both time and temperature and can be easily parsed.
-							</p>
-
-							<h5>Case Statements for GET_TEMP_READINGS</h5>
-							<pre><code>case GET_TEMP_READINGS:
-    // setup code has been redacted for purposes of not posting unnecessary code
-    for (int i = 0; i < 20; i++) {
-        tx_estring_value.clear();
-        tx_estring_value.append("Time: ");
-        tx_estring_value.append(time_array1[i]);
-        tx_estring_value.append("s Temp: ");
-        tx_estring_value.append(temp_array[i]);
-        tx_estring_value.append(" degrees ");
-        tx_characteristic_string.writeValue(tx_estring_value.c_str());
-    }
-    break;</code></pre>
-
-							<p>
 								My notification handler broke when I added SEND_TEMP_DATA and GET_TEMP_READINGS, so I went back to reevaluate it as it
 								was repeating weirdly. While I never figured out exactly what it was, I simplified it and redid it to print general statements.
 							</p>
-
-							<span class="image fit">
-								<img src="images/lab1/gettemp.png" alt="GET_TEMP_READINGS output" />
-							</span>
-
-							<p>The photo above shows the GET_TEMP_READINGS command in action.</p>
 
 							<h4 id="lab-question">8. Lab Question</h4>
 							<p>
@@ -394,10 +334,6 @@ ble.send_command(CMD.GET_TIME_MILLIS, "")</code></pre>
 								the board and establishing communication with it. I struggled with getting set up only to realize that my bluetooth was not on.
 								It also took me embarrassingly long to realize that I did not update my commands properly.
 							</p>
-
-							<span class="image fit">
-								<img src="images/lab1/commandupdates.png" alt="Command updates screenshot" />
-							</span>
 
 							<hr />
 
@@ -445,3 +381,4 @@ ble.send_command(CMD.GET_TIME_MILLIS, "")</code></pre>
 
 	</body>
 </html>
+
