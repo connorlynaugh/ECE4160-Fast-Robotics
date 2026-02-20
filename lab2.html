@@ -6,41 +6,32 @@
 -->
 <html>
 	<head>
-		<title>No Sidebar - Twenty by HTML5 UP</title>
+		<title>Lab 2 – IMU</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="stylesheet" href="assets/css/main.css" />
 		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+
+		<!-- Small helper styles (optional, safe to remove) -->
+		<style>
+			.lab-meta { margin: 0.25rem 0 0; }
+			.callout { background: rgba(0,0,0,0.03); border-left: 4px solid rgba(0,0,0,0.15); padding: 1rem; border-radius: 0.5rem; }
+			hr.section { margin: 2rem 0; }
+			code.inline { padding: 0.1rem 0.35rem; border-radius: 0.25rem; background: rgba(0,0,0,0.06); }
+		</style>
 	</head>
 	<body class="no-sidebar is-preload">
 		<div id="page-wrapper">
 
 			<!-- Header -->
 				<header id="header">
-					<h1 id="logo"><a href="index.html">Twenty <span>by HTML5 UP</span></a></h1>
+					<h1 id="logo"><a href="index.html">Connor Lynaugh <span>Lab Reports</span></a></h1>
 					<nav id="nav">
 						<ul>
-							<li class="current"><a href="index.html">Welcome</a></li>
-							<li class="submenu">
-								<a href="#">Layouts</a>
-								<ul>
-									<li><a href="left-sidebar.html">Left Sidebar</a></li>
-									<li><a href="right-sidebar.html">Right Sidebar</a></li>
-									<li><a href="no-sidebar.html">No Sidebar</a></li>
-									<li><a href="contact.html">Contact</a></li>
-									<li class="submenu">
-										<a href="#">Submenu</a>
-										<ul>
-											<li><a href="#">Dolore Sed</a></li>
-											<li><a href="#">Consequat</a></li>
-											<li><a href="#">Lorem Magna</a></li>
-											<li><a href="#">Sed Magna</a></li>
-											<li><a href="#">Ipsum Nisl</a></li>
-										</ul>
-									</li>
-								</ul>
-							</li>
-							<li><a href="#" class="button primary">Sign Up</a></li>
+							<li><a href="index.html">Home</a></li>
+							<li class="current"><a href="lab2-imu.html">Lab 2 – IMU</a></li>
+							<li><a href="contact.html">Contact</a></li>
+							<!-- If you want to keep the original dropdown, you can re-add it here -->
 						</ul>
 					</nav>
 				</header>
@@ -49,79 +40,273 @@
 				<article id="main">
 
 					<header class="special container">
-						<span class="icon solid fa-mobile-alt"></span>
-						<h2>And finally there's <strong>No Sidebar</strong></h2>
-						<p>Where that in the center faces the nameless horrors alone.</p>
+						<span class="icon solid fa-compass"></span>
+						<h2><strong>Lab 2 – IMU</strong></h2>
+						<p class="lab-meta">ICM-20948 Integration with Artemis Nano • Accelerometer + Gyroscope • Filtering + Bluetooth Telemetry</p>
 					</header>
 
-					<!-- One -->
-						<section class="wrapper style4 container">
+					<section class="wrapper style4 container">
 
-							<!-- Content -->
-								<div class="content">
-									<section>
-										<a href="#" class="image featured"><img src="images/pic04.jpg" alt="" /></a>
-										<header>
-											<h3>Dolore Amet Consequat</h3>
-										</header>
-										<p>Aliquam massa urna, imperdiet sit amet mi non, bibendum euismod est. Curabitur mi justo, tincidunt vel eros ullamcorper, porta cursus justo. Cras vel neque eros. Vestibulum diam quam, mollis at consectetur non, malesuada quis augue. Morbi tincidunt pretium interdum. Morbi mattis elementum orci, nec dictum massa. Morbi eu faucibus massa. Aliquam massa urna, imperdiet sit amet mi non, bibendum euismod est. Curabitur mi justo, tincidunt vel eros ullamcorper, porta cursus justo. Cras vel neque eros. Vestibulum diam.</p>
-										<p>Vestibulum diam quam, mollis at consectetur non, malesuada quis augue. Morbi tincidunt pretium interdum. Morbi mattis elementum orci, nec dictum porta cursus justo. Quisque ultricies lorem in ligula condimentum, et egestas turpis sagittis. Cras ac nunc urna. Nullam eget lobortis purus. Phasellus vitae tortor non est placerat tristique. Sed id sem et massa ornare pellentesque. Maecenas pharetra porta accumsan. </p>
-										<p>In vestibulum massa quis arcu lobortis tempus. Nam pretium arcu in odio vulputate luctus. Suspendisse euismod lorem eget lacinia fringilla. Sed sed felis justo. Nunc sodales elit in laoreet aliquam. Nam gravida, nisl sit amet iaculis porttitor, risus nisi rutrum metus, non hendrerit ipsum arcu tristique est.</p>
-									</section>
+						<div class="content">
+							<section>
+
+								<!-- HERO IMAGE (replace src with your IMU photo) -->
+								<a href="#" class="image featured">
+									<img src="images/lab2_imu.jpg" alt="ICM-20948 IMU connected to Artemis Nano" />
+								</a>
+								<p style="margin-top: -0.75rem; font-style: italic; opacity: 0.85;">
+									Figure 1: ICM-20948 IMU attached to the Artemis Nano.
+								</p>
+
+								<header>
+									<h3>Objective</h3>
+								</header>
+								<p>
+									The goal of this lab was to integrate the ICM-20948 IMU with the Artemis Nano and start collecting data on the
+									car’s orientation using both accelerometer and gyroscope data. By combining sensor data and applying filters we are
+									supposed to build a stable movement model that can be communicated over bluetooth.
+								</p>
+
+								<hr class="section" />
+
+								<header>
+									<h3>Setting up the IMU</h3>
+								</header>
+
+								<p>
+									The <span class="inline code">AD0_VAL</span> in the Basic Sparkfun Example dictates the least significant bit of the
+									IMU’s I2C address and should be set to 1 which is default.
+								</p>
+
+								<p>
+									When moving the IMU, acceleration changes along the noted axes on the board, with gravity constantly applying
+									acceleration towards the ground. If only moved in translational directions there are no gyroscope readings. The
+									gyroscope only picks up rotational movements which rotate about the noted axes on the board. Similarly rotational
+									movements do not affect the accelerometer readings apart from the constant gravity.
+								</p>
+
+								<div class="callout">
+									<strong>Video placeholder:</strong> IMU moving with live data<br />
+									<em>Embed your video here (YouTube iframe) or link a .mp4 hosted in your repo.</em>
 								</div>
 
-						</section>
+								<p style="margin-top: 1rem;">
+									To help with visual debugging I added a function which runs in the board setup which flashes the on-board LED three
+									times before entering the main loop function.
+								</p>
 
-					<!-- Two -->
-						<section class="wrapper style1 container special">
-							<div class="row">
-								<div class="col-4 col-12-narrower">
+								<hr class="section" />
 
-									<section>
-										<header>
-											<h3>This is Something</h3>
-										</header>
-										<p>Sed tristique purus vitae volutpat ultrices. Aliquam eu elit eget arcu commodo suscipit dolor nec nibh. Proin a ullamcorper elit, et sagittis turpis. Integer ut fermentum.</p>
-										<footer>
-											<ul class="buttons">
-												<li><a href="#" class="button small">Learn More</a></li>
-											</ul>
-										</footer>
-									</section>
+								<header>
+									<h3>Accelerometer</h3>
+								</header>
 
+								<p>
+									Using the equations from lecture I calculated pitch and roll using the accelerometer data in each axis. The
+									trigonometric formulation uses <span class="inline code">atan2</span> to remain numerically stable across quadrants:
+								</p>
+
+								<pre><code>pitch = atan2(accX, accZ) * 180/M_PI;
+roll  = atan2(accY, accZ) * 180/M_PI;</code></pre>
+
+								<div class="callout">
+									<strong>Video placeholder:</strong> IMU moving pitch and roll from 90 → 0 → -90 degrees on computer edge
 								</div>
-								<div class="col-4 col-12-narrower">
 
-									<section>
-										<header>
-											<h3>Also Something</h3>
-										</header>
-										<p>Sed tristique purus vitae volutpat ultrices. Aliquam eu elit eget arcu commodo suscipit dolor nec nibh. Proin a ullamcorper elit, et sagittis turpis. Integer ut fermentum.</p>
-										<footer>
-											<ul class="buttons">
-												<li><a href="#" class="button small">Learn More</a></li>
-											</ul>
-										</footer>
-									</section>
+								<p style="margin-top: 1rem;">
+									As shown in the video the accelerometer is able to quickly follow the changes in acceleration and when stabilized
+									accurately display a large acceleration towards the direction of gravity.
+								</p>
 
+								<p>
+									A python script was written to both parse and plot the data arrays sent from the Artemis over bluetooth and is
+									illustrated later in this report. The arrays sent for the accelerometer include time, pitch, and roll. An array
+									size of 2000 accurately encompassed 6-8 seconds of data.
+								</p>
+
+								<p>
+									The accelerometer showed overall good accuracy in all axes during repeated runs. The bias between a positive axis
+									and a negative one was not substantial nor consistent on reboot so two point calibration was not required.
+								</p>
+
+								<p>
+									To test the noise levels of the IMU the car motors were driven in its proximity and vibrations were induced on the
+									testing table. The resulting noise levels were notably high across the whole spectrum once the data was analyzed in
+									the frequency domain.
+								</p>
+
+								<!-- FFT IMAGE PLACEHOLDER -->
+								<a href="#" class="image featured">
+									<img src="images/lab2_fft_noise.png" alt="FFT noise plot for accelerometer pitch/roll" />
+								</a>
+								<p style="margin-top: -0.75rem; font-style: italic; opacity: 0.85;">
+									Figure 2: Frequency domain (FFT) showing noise components during motor/vibration testing.
+								</p>
+
+								<p>
+									Looking closely there is a noticeable frequency component from zero (of course) but also the frequencies up to 5Hz.
+									This can be seen most clearly in the Pitch Fast Fourier Transform graph. Thus, 5Hz was set as the cutoff frequency
+									to keep some accelerometer responsiveness while also filtering out the high frequency noise. The following equations
+									from class were then used to find an alpha of 0.0982, corresponding to my sampling rate of 288.66 Hz.
+								</p>
+
+								<div class="callout">
+									<strong>Equation placeholders:</strong><br />
+									- Insert alpha equation image here<br />
+									- Insert cutoff frequency equation image here
 								</div>
-								<div class="col-4 col-12-narrower">
 
-									<section>
-										<header>
-											<h3>Probably Something</h3>
-										</header>
-										<p>Sed tristique purus vitae volutpat ultrices. Aliquam eu elit eget arcu commodo suscipit dolor nec nibh. Proin a ullamcorper elit, et sagittis turpis. Integer ut fermentum.</p>
-										<footer>
-											<ul class="buttons">
-												<li><a href="#" class="button small">Learn More</a></li>
-											</ul>
-										</footer>
-									</section>
+								<p style="margin-top: 1rem;">
+									Upon implementing the low pass filter the accelerometer data is substantially less noisy and has a cleaner frequency
+									domain, though some persistent noise still exists.
+								</p>
 
+								<p>
+									It is worth noting that the IMU board features an integrated “Digital Motion Processor” that runs its own algorithms
+									on sensor feedback before passing the data to the Artemis board.
+								</p>
+
+								<hr class="section" />
+
+								<header>
+									<h3>Gyroscope</h3>
+								</header>
+
+								<p>
+									The equations for calculating pitch, roll, and yaw angles from the gyroscope use integration over time following
+									this equation:
+								</p>
+
+								<pre><code>dt = (micros()-last_time)/1000000;
+angle += gyro_rate * dt;</code></pre>
+
+								<p>
+									This was applied to all three gyroscope axes to create the following reading.
+								</p>
+
+								<div class="callout">
+									<strong>Figure placeholder:</strong> raw gyro reading (pitch/roll/yaw)
 								</div>
-							</div>
-						</section>
+
+								<p style="margin-top: 1rem;">
+									The gyroscope provides smooth motion tracking and can handle fast changes well, but because it relies on additive
+									integration any and all small errors increase in size over time. When compared to the accelerometer which does not
+									experience any drifting bias, the accelerometer is much more susceptible to vibrational and environmental noise.
+									Thus, the accelerometer provides long term absolute orientation with the help of gravity and the gyroscope provides
+									smooth tracking and accurate short term tracking.
+								</p>
+
+								<div class="callout">
+									<strong>Figure placeholder:</strong> raw gyro vs accelerometer comparison plot
+								</div>
+
+								<p style="margin-top: 1rem;">
+									The sampling rate directly impacts the gyroscope integration quality because smaller steps provide higher resolution.
+									When sampling is slow, each update covers a large time delta so any bias or noise encountered in this period is
+									magnified in the sample. On the flip side as sampling is fast, time delta decreases and integration becomes smoother
+									and more stable.
+								</p>
+
+								<p>
+									To combine strengths of both sensors I apply a complimentary filter as follows:
+								</p>
+
+								<pre><code>angle = (1-alpha)(prev_angle + gyro_delta) + alpha*(accel_angle)</code></pre>
+
+								<p>
+									Because my sampling rate is generally high in the range of 250-350 Hz the gyroscope actually provides the most
+									accurate data in the near term and thus I chose to essentially weigh it at 95% with an alpha of 0.05. This means the
+									accelerometer only lightly contributes to the total trend, but consistently counters the long term drift. With this
+									combination the complimentary filter is able to accurately chase both stable and sporadic movements, though it does
+									experience some lag in terms of updating.
+								</p>
+
+								<div class="callout">
+									<strong>Figure placeholders:</strong><br />
+									- stationary complementary filter plot<br />
+									- mobile complementary filter plot
+								</div>
+
+								<p style="margin-top: 1rem;">
+									While stationary the complimentary filter is able to most accurately model the lack of movement in comparison to both
+									the filtered accelerometer and the raw gyroscope data. While moving it is also able to accurately track the changes,
+									most notably in the roll graph where the primary movement was occurring about the axis.
+								</p>
+
+								<hr class="section" />
+
+								<header>
+									<h3>Sample Data Collection</h3>
+								</header>
+
+								<header>
+									<h4>Loop optimization</h4>
+								</header>
+
+								<p>
+									In order to increase the sampling rate I removed any delay, print, or busy wait functions to prevent unnecessary time
+									gates. The data is stored in a predefined data array of floats. I chose a size of 2000 elements to appropriately
+									capture over 5 seconds of data with leeway for starting and ending a motion. The IMU data collection and the bluetooth
+									data transmit were both moved into the main loop as opposed to a specific case using data flags. So now the
+									<span class="inline code">GET_ACC_GYRO</span> case just resets flags as appropriate to enable the data collection in
+									main. With these changes the mean sampling rate became 275Hz and the median was 333.3Hz, an improvement from before.
+									At this point the IMU refresh rate is a limiting factor as the loop to collect data depends on the IMU registering
+									containing new and available data.
+								</p>
+
+								<p>
+									In order to store data into the arrays my code first checks to see if there is new available data. If there is, it
+									records the current time in microseconds and uses the previous time to calculate the time delta for the gyroscope
+									integration. Gyroscope pitch roll and yaw are then respectively calculated and then stored into the respective array
+									at the correct index. Simultaneously, the time stamp is saved using milliseconds and the data for the accelerometer’s
+									pitch and roll are calculated and stored respectively. Then the IMU array index is incremented and the loop will wait
+									until the data function is called again and data is available. If the data arrays are full the flag for data
+									collection is lowered and the flag for data transmission is raised handing off responsibilities to a transmit function
+									in the main loop.
+								</p>
+
+								<p>
+									The transmit function behaves very similarly to those in previous labs involving clearing the transmit string data,
+									appending new information, and then finally writing the finished value. This occurs in a loop through each index as it
+									is iterated each time and finishes upon completing the array.
+								</p>
+
+								<div class="callout">
+									<strong>Figure placeholder:</strong> final transmitted data example (screenshot/log)
+								</div>
+
+								<p style="margin-top: 1rem;">
+									The float type was chosen for the data arrays given that the IMU outputs decimal numbers and because they take up half
+									of the space as a double. This also provided sufficient precision for the car’s needs.
+								</p>
+
+								<p>
+									The Artemis Nano has about 384 kB of RAM available and each IMU sample as designed in my lab consists of six values:
+									time, accelerometer pitch, accelerometer roll, gyroscope pitch, gyroscope roll, and gyroscope yaw. Each of these
+									values are stored as 4 byte floats meaning each time sample has 24 bytes of data. At the measured sampling rate of
+									275Hz, the Artemis could store approximately 60 full seconds of data.
+								</p>
+
+								<hr class="section" />
+
+								<header>
+									<h3>RC Car Stunt</h3>
+								</header>
+
+								<div class="callout">
+									<strong>Video placeholder:</strong> stunt video
+								</div>
+
+								<p style="margin-top: 1rem;">
+									After playing around with the car I discovered that driving the car quickly forward or backward and suddenly switching
+									directions provided reliable torque that could flip the vehicle over to the underside. This is the stunt that I chose
+									to record in my demonstration.
+								</p>
+
+							</section>
+						</div>
+
+					</section>
 
 				</article>
 
@@ -129,15 +314,13 @@
 				<footer id="footer">
 
 					<ul class="icons">
-						<li><a href="#" class="icon brands circle fa-twitter"><span class="label">Twitter</span></a></li>
-						<li><a href="#" class="icon brands circle fa-facebook-f"><span class="label">Facebook</span></a></li>
-						<li><a href="#" class="icon brands circle fa-google-plus-g"><span class="label">Google+</span></a></li>
 						<li><a href="#" class="icon brands circle fa-github"><span class="label">Github</span></a></li>
-						<li><a href="#" class="icon brands circle fa-dribbble"><span class="label">Dribbble</span></a></li>
+						<li><a href="#" class="icon brands circle fa-linkedin-in"><span class="label">LinkedIn</span></a></li>
+						<li><a href="#" class="icon brands circle fa-twitter"><span class="label">Twitter</span></a></li>
 					</ul>
 
 					<ul class="copyright">
-						<li>&copy; Untitled</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+						<li>&copy; Connor Lynaugh</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
 					</ul>
 
 				</footer>
