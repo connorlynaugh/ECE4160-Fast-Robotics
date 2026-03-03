@@ -1,0 +1,276 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Lab 4 - ECE4160 Fast Robotics Spring 2026</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+
+	<style>
+	:root{
+		--media-gap: 1.25rem;
+		--media-bottom: 2.25rem;
+		--section-gap: 3rem;
+		--page-max: 100%;
+		--media-max: 650px;        /* was 900px */
+		--media-small-max: 400px;  /* was 560px */
+		--media-code-max: 500px;   /* was 650px */
+	}
+
+	code.inline {
+		background: rgba(0,0,0,0.06);
+		padding: 0.1em 0.3em;
+		border-radius: 4px;
+	}
+
+	#main .content h3 {
+		font-size: 2.0em;
+		font-weight: 800;
+		margin-top: var(--section-gap);
+		margin-bottom: 0.75rem;
+	}
+
+	#main .content h4 {
+		font-size: 1.35em;
+		font-weight: 750;
+		margin-top: 2.25rem;
+		margin-bottom: 0.6rem;
+	}
+
+	#main .content hr { margin: 3rem 0; }
+
+	#main .content span.image.fit{
+		display:block;
+		width:100%;
+		max-width: var(--media-max);
+		margin: var(--media-gap) auto var(--media-bottom) auto;
+	}
+
+	#main .content span.image.fit img {
+		width:100%;
+		height:auto;
+	}
+
+	span.image.fit.media-small { max-width: var(--media-small-max); }
+	span.image.fit.media-code  { max-width: var(--media-code-max); }
+	span.image.fit.media-wide  { max-width: 1000px; }
+
+	.media-row {
+		display:flex;
+		flex-wrap:wrap;
+		gap:1rem;
+		align-items:flex-start;
+		margin: var(--media-gap) auto var(--media-bottom) auto;
+		max-width: var(--page-max);
+		justify-content:center;
+	}
+
+	.media-row .media-item {
+		flex:1 1 340px;
+		max-width:520px;
+	}
+
+	.media-row .media-item img {
+		width:100%;
+		height:auto;
+		display:block;
+	}
+	</style>
+	</head>
+
+	<body class="no-sidebar is-preload">
+	<div id="page-wrapper">
+
+	<header id="header">
+		<h1 id="logo"><a href="index.html">Fast Robotics <span>Spring 2026</span></a></h1>
+		<nav id="nav">
+			<ul>
+				<li><a href="index.html">Welcome</a></li>
+				<li><a href="lab2.html">Lab 2</a></li>
+				<li><a href="lab3.html">Lab 3</a></li>
+				<li class="current"><a href="lab4.html">Lab 4</a></li>
+			</ul>
+		</nav>
+	</header>
+
+	<article id="main">
+
+	<header class="special container">
+		<span class="icon solid fa-car"></span>
+		<h2><strong>Lab 4: Motors and Open Loop Control</strong></h2>
+		<p>
+			ECE4160 Fast Robotics — Spring 2026<br />
+			Connor Lynaugh
+		</p>
+	</header>
+
+	<section class="wrapper style4 container">
+	<div class="content">
+	<section>
+
+	<h3>Objective</h3>
+	<p>
+	The goal of this lab was to convert my car from manual to open loop control. After this lab the car can execute pre-programmed movement sequences using the Artemis Nano and two dual motor driver boards.
+	</p>
+
+	<h3>Prelab</h3>
+
+	<span class="image fit">
+		<img src="images/lab4/Diagram.png" alt="Motor wiring diagram" />
+	</span>
+
+	<p>
+	I wired my motor circuitry as shown above. Four adjacent PWM pins (13–16) on the unused side of the Artemis Nano were selected for motor control. All grounds were tied together to prevent unnecessary ground islands or loops.
+	</p>
+
+	<p>
+	The A and B inputs and outputs of each dual motor driver were shorted together to increase available output current. The Artemis Nano and motors were powered using two separate 850mAh batteries. This isolation prevents motor current transients from sagging the logic rail and resetting the microcontroller.
+	</p>
+
+	<h3>Lab Tasks</h3>
+
+	<span class="image fit">
+		<img src="images/lab4/Desk.png" alt="Initial motor driver wiring setup" />
+	</span>
+
+	<p>
+	I first tested a single dual motor driver with both sets of inputs and outputs wired in parallel. The motors were initially powered from a bench supply set to 3.7V with a current limit enabled to prevent shorts.
+	</p>
+
+	<span class="image fit media-code">
+		<img src="images/lab4/AnalogWrite.png" alt="AnalogWrite PWM example code" />
+	</span>
+
+	<p>
+	An oscilloscope was connected to verify the PWM waveform generated using <code class="inline">analogWrite()</code>. To drive forward motion, one input was modulated while the complementary input was held low.
+	</p>
+
+	<div class="media-row">
+		<div class="media-item">
+			<iframe width="100%" height="315" src="https://www.youtube.com/embed/tMXOtF-3Ne0" frameborder="0" allowfullscreen></iframe>
+		</div>
+	</div>
+
+	<span class="image fit media-small">
+		<img src="images/lab4/DutyCycle.png" alt="Duty cycle oscilloscope screenshot" />
+	</span>
+
+	<p>
+	After verifying proper operation with one controller, I integrated the second motor driver to support independent left and right motor control. Backward motion was achieved by reversing which input was PWM-driven.
+	</p>
+
+	<span class="image fit media-code">
+		<img src="images/lab4/Direction.png" alt="Forward and backward motor code" />
+	</span>
+
+	<div class="media-row">
+		<div class="media-item">
+			<iframe width="100%" height="315" src="https://www.youtube.com/embed/ci5ZmE_SMaI" frameborder="0" allowfullscreen></iframe>
+		</div>
+	</div>
+
+	<p>
+	After switching from bench supply to battery power, the full system operated reliably without resets.
+	</p>
+
+	<span class="image fit media-wide">
+		<img src="images/lab4/Car.png" alt="Fully integrated car system" />
+	</span>
+
+	<h3>PWM Calibration</h3>
+
+	<span class="image fit media-code">
+		<img src="images/lab4/PWMLimit.png" alt="PWM calibration script" />
+	</span>
+
+	<p>
+	Through testing I determined:
+	</p>
+
+	<ul>
+		<li>~77/255 (~30%) duty cycle initiates forward motion</li>
+		<li>~119/255 (~47%) duty cycle initiates turning in place</li>
+	</ul>
+
+	<p>
+	Lower duty cycles are sufficient once wheels are already in motion.
+	</p>
+
+	<div class="media-row">
+		<div class="media-item">
+			<iframe width="100%" height="315" src="https://www.youtube.com/embed/qOW8Xz9qHbo" frameborder="0" allowfullscreen></iframe>
+		</div>
+	</div>
+
+	<h3>Straight Line Motion</h3>
+
+	<span class="image fit media-code">
+		<img src="images/lab4/LineCode.png" alt="Straight line driving code" />
+	</span>
+
+	<p>
+	Using calibrated PWM values I was able to reliably drive the car forward in a straight line under open loop control.
+	</p>
+
+	<h3>Open Loop Movement Functions</h3>
+
+	<div class="media-row">
+		<div class="media-item">
+			<span class="image fit" style="margin:0;">
+				<img src="images/lab4/OpenLoop.png" alt="Open loop main routine" />
+			</span>
+		</div>
+		<div class="media-item">
+			<span class="image fit" style="margin:0;">
+				<img src="images/lab4/OpenLoopHelpers.png" alt="Helper motion functions" />
+			</span>
+		</div>
+	</div>
+
+	<div class="media-row">
+		<div class="media-item">
+			<iframe width="100%" height="315" src="https://www.youtube.com/embed/NGCTolybxKM" frameborder="0" allowfullscreen></iframe>
+		</div>
+	</div>
+
+	<p>
+	The final program executes a fully open loop movement routine consisting of forward motion, turns, and stops without feedback correction.
+	</p>
+
+	<h3>Acknowledgements</h3>
+	<p>
+	I worked with the TAs to execute this lab smoothly.
+	</p>
+
+	<ul class="buttons">
+		<li><a href="#page-wrapper" class="button small scrolly">Back to Top</a></li>
+		<li><a href="index.html" class="button small">Back to Lab Reports</a></li>
+	</ul>
+
+	</section>
+	</div>
+	</section>
+
+	</article>
+
+	<footer id="footer">
+		<ul class="copyright">
+			<li>&copy; Connor Lynaugh</li>
+			<li>Design: HTML5 UP</li>
+		</ul>
+	</footer>
+
+	</div>
+
+	<script src="assets/js/jquery.min.js"></script>
+	<script src="assets/js/jquery.dropotron.min.js"></script>
+	<script src="assets/js/jquery.scrolly.min.js"></script>
+	<script src="assets/js/jquery.scrollex.min.js"></script>
+	<script src="assets/js/browser.min.js"></script>
+	<script src="assets/js/breakpoints.min.js"></script>
+	<script src="assets/js/util.js"></script>
+	<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
