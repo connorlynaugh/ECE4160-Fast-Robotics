@@ -99,8 +99,12 @@ To begin the stunt, I added a new Bluetooth command called <code>STUNT_DRIFT</co
     resetDriftErrorWindow();</code></pre>
 
 <p>
-This command also reads in all of the gains and stunt parameters over BLE, including the approach gains, turn gains, trigger distance, drive-away time, and trim values. After that, it initializes the Kalman filter from the current ToF reading and captures the current yaw so that the turn target can be set to 180 degrees from the starting orientation.
+This command also reads in all of the gains and stunt parameters over BLE, including the approach gains, turn gains, trigger distance, drive-away time, and trim values. After that, it initializes the Kalman filter from the current ToF reading and captures the current yaw so that the turn target can be set to 180 degrees from the starting orientation. My python code can be found below.
 </p>
+
+<span class="image fit">
+	<img src="images/lab8/python.png" alt="Python notification handler and BLE drift command" />
+</span>
 
 <h3>State Machine for the Drift</h3>
 <p>
@@ -119,6 +123,10 @@ The approach state is governed by the filtered distance estimate. The trigger di
 <p>
 My code then resets the orientation PID state and computes the new yaw target. This transition was important because it prevented old controller history from carrying over into the turn state.
 </p>
+
+<span class="image fit">
+	<img src="images/lab8/state0.png" alt="State 0 approach logic" />
+</span>
 
 <h3>180 Degree Turn Logic</h3>
 <p>
@@ -147,10 +155,18 @@ return ((sum / DRIFT_ERR_WINDOW) &lt;= drift_avg_tol);</code></pre>
 This meant every recent error had to stay under a bound, and the average of the recent absolute errors also had to remain under a bound. This made the stunt much more repeatable because the car would not drive away while it was still visibly swinging through the target orientation.
 </p>
 
+<span class="image fit">
+	<img src="images/lab8/state1.png" alt="State 1 turn logic" />
+</span>
+
 <h3>Drive Away and Logging</h3>
 <p>
 After settling, the car enters state 2 and drives away for a fixed amount of time. I kept this phase simple and used a fixed PWM instead of another separate closed-loop distance controller. By this point, the main goal was just to finish the stunt quickly and clearly. In my chosen runs, the drive-away time was 1400 ms and the drive-away PWM was 255. Once that timeout expires, the board stops the motors and sends the logged data over BLE like in previous labs.
 </p>
+
+<span class="image fit">
+	<img src="images/lab8/state2.png" alt="State 2 drive away logic" />
+</span>
 
 <p>
 During the stunt, the board stored time, raw ToF distance, yaw, command effort, control error, and the current state number. The logging function looked like this:
@@ -170,8 +186,8 @@ The three runs I chose to compare were the following:
 
 <p>
 <strong>Run 1:</strong><br />
-3.94 s using<br />
-<code>-15.0|-0.0|-1.8|-15|-15.0|-2.0|1000|1400|255|0.35|0.4</code>
+3.94 s using ToF PID (-15.0|0|-1.8), Orientation PID (-15.0|-15.0|-2.0), 914 mm ToF trigger distance, 1400 ms drive back time, 255 drive back pwm, 0.35 motor trim on forward, and 0.4 motor trim on drift. <br />
+<code>-15.0|-0.0|-1.8|-15|-15.0|-2.0|914|1400|255|0.35|0.4</code>
 </p>
 
 <div class="media-row">
@@ -184,8 +200,8 @@ The three runs I chose to compare were the following:
 
 <p>
 <strong>Run 2:</strong><br />
-4.08 s using<br />
-<code>-15.0|-0.0|-1.8|-15|-20.0|-2.0|1000|1400|255|0.35|0.4</code>
+4.08 s using ToF PID (-15.0|0|-1.8), Orientation PID (-15.0|-20.0|-2.0), 914 mm ToF trigger distance, 1400 ms drive back time, 255 drive back pwm, 0.35 motor trim on forward, and 0.4 motor trim on drift. <br />
+<code>-15.0|-0.0|-1.8|-15|-20.0|-2.0|914|1400|255|0.35|0.4</code>
 </p>
 
 <div class="media-row">
@@ -198,8 +214,8 @@ The three runs I chose to compare were the following:
 
 <p>
 <strong>Run 3:</strong><br />
-3.20 s using<br />
-<code>-15.0|-0.0|-0.5|-60|-0.0|-20.0|1000|1400|255|0.35|0.85</code>
+3.20 s using ToF PID (-15.0|0|-0.5), Orientation PID (-60.0|0.0|-20.0), 914 mm ToF trigger distance, 1400 ms drive back time, 255 drive back pwm, 0.35 motor trim on forward, and 0.85 motor trim on drift. <br />
+<code>-15.0|-0.0|-0.5|-60|-0.0|-20.0|914|1400|255|0.35|0.85</code>
 </p>
 
 <div class="media-row">
@@ -211,7 +227,7 @@ The three runs I chose to compare were the following:
 </span>
 
 <p>
-The best run was clearly the third one at 3.20 seconds. The largest difference in that case was a much more aggressive turn controller combined with a larger turn trim, which made the car commit much more strongly to the rotation and spend less time oscillating in the turn state. The first two runs completed the stunt successfully, but they were slower overall because the turn phase took longer to settle.
+The best run was clearly the third one at 3.20 seconds. The largest difference in that case was a much more aggressive turn controller combined with a larger turn trim, which made the car commit much more strongly to the rotation and spend less time oscillating in the turn state.
 </p>
 
 <h3>Discussion</h3>
