@@ -1,0 +1,238 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Lab 9 - ECE4160 Fast Robotics Spring 2026</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <link rel="stylesheet" href="assets/css/main.css" />
+    <noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+
+<style>
+:root{
+    --media-gap: 1.25rem;
+    --media-bottom: 2.25rem;
+    --section-gap: 3rem;
+    --page-max: 100%;
+    --media-max: 700px;
+    --media-small-max: 420px;
+}
+
+#main .content h3 {
+    font-size: 2.0em;
+    font-weight: 800;
+    margin-top: var(--section-gap);
+}
+
+span.image.fit{
+    display:block;
+    width:100%;
+    max-width: var(--media-max);
+    margin: var(--media-gap) auto var(--media-bottom) auto;
+}
+
+span.image.fit img {
+    width:100%;
+    height:auto;
+}
+
+span.image.fit.media-small { max-width: var(--media-small-max); }
+
+.media-row {
+    display:flex;
+    flex-wrap:wrap;
+    gap:1rem;
+    justify-content:center;
+    align-items:flex-start;
+    margin: var(--media-gap) auto var(--media-bottom) auto;
+}
+
+.media-row .image.fit {
+    margin: 0;
+    flex: 1 1 320px;
+    max-width: 48%;
+}
+
+pre {
+    overflow-x: auto;
+}
+</style>
+</head>
+
+<body class="no-sidebar is-preload">
+<div id="page-wrapper">
+
+<header id="header">
+    <h1 id="logo"><a href="index.html">Fast Robotics <span>Spring 2026</span></a></h1>
+    <nav id="nav">
+        <ul>
+            <li><a href="index.html">Welcome</a></li>
+            <li><a href="lab7.html">Lab 7</a></li>
+            <li><a href="lab8.html">Lab 8</a></li>
+            <li class="current"><a href="lab9.html">Lab 9</a></li>
+        </ul>
+    </nav>
+</header>
+
+<article id="main">
+
+<header class="special container">
+    <span class="icon solid fa-robot"></span>
+    <h2><strong>Lab 9: Orientation-Based Mapping with Dual ToF Sensors</strong></h2>
+    <p>ECE4160 Fast Robotics — Spring 2026<br />Connor Lynaugh</p>
+</header>
+
+<section class="wrapper style4 container">
+<div class="content">
+<section>
+
+<span class="image fit">
+    <img src="images/lab9/wall_map.png" alt="Final mapped walls overlaid on sensor data" />
+</span>
+
+<h3>Objective</h3>
+<p>
+The objective of Lab 9 was to generate a sparse geometric map of the environment by rotating the robot through a sequence of known headings, collecting paired Time-of-Flight distance measurements, and transforming those measurements into the inertial room frame. Rather than continuously mapping while the robot was rotating, the system was designed to pause at a discrete set of angular targets, allow the orientation controller to settle, and then capture a synchronized pair of range samples.
+</p>
+
+<h3>System Design</h3>
+<p>
+The mapping system was built on top of the orientation PID controller from the previous lab and extended with two new BLE commands: MAP and SEND_MAP. The MAP command initialized the mapping routine, reset the orientation-control state, loaded the orientation PID gains, and enabled a map-specific flag so that the robot would step through a predefined sequence of target headings. The SEND_MAP command transmitted the stored scan results over BLE.
+</p>
+
+<span class="image fit">
+    <img src="images/lab9/parameters.png" alt="Mapping command parameters" />
+</span>
+
+<p>
+A fixed angle schedule was stored in map_angles, containing 14 headings spanning approximately 0° to 360°. The spacing is about 27.69°, which allows a full scan with moderate angular resolution while keeping the runtime manageable. Each heading corresponded to one map entry, with a stored timestamp, yaw estimate, and both ToF readings.
+</p>
+
+<h3>Additional Firmware Logic for Mapping</h3>
+<p>
+Mapping logic was placed inside the main control loop after the orientation PID update. When map_flag is enabled, the robot repeatedly checks whether the orientation error has fallen within a threshold band, yaw_threshold = 2, around the current target. To avoid recording data while the robot is still passing the target, the robot must remain settled within the threshold for 500 ms before taking a measurement. This was implemented with a settle_start timer. Once the heading had remained within threshold long enough, the firmware recorded the current yaw and both ToF distances, incremented map_index, and advanced to the next target heading.
+</p>
+
+<span class="image fit">
+    <img src="images/lab9/settling.png" alt="Settling logic for map measurements" />
+</span>
+
+<p>
+Measured yaw, rather than commanded yaw, was used in the saved data for the highest possible accuracy. Since the robot was only required to settle within a 2 degree band, using the DMP-reported yaw produced a more faithful representation of the actual heading for each recorded sample.
+</p>
+
+<h3>Orientation Control Support and Re-tuning</h3>
+<p>
+Reliable mapping depended on reliable heading control, so part of the Lab 9 work involved re-tuning the orientation PID loop for fast settling and low oscillation. The MAP command reused the existing orientation PID pipeline but reset all relevant state variables before beginning the sweep, including Opid_index, the filtered derivative memory, yaw extrapolation state, and the integral window. The following PID was utilized to produce the chosen map spin illustrated below.
+</p>
+
+<span class="image fit">
+    <img src="images/lab9/spin_tuning.png" alt="Orientation PID tuning for mapping" />
+</span>
+
+<div class="media-row">
+    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/oL-Yx1TebZI?rel=0&amp;modestbranding=1&amp;playsinline=1" title="Lab 9 Mapping Spin" frameborder="0" allowfullscreen></iframe>
+</div>
+
+<span class="image fit">
+    <img src="images/lab9/spin_data.png" alt="Orientation spin response data" />
+</span>
+
+<p>
+Repeated scans were generally consistent, especially for nearby obstacles, which suggests the robot was turning reasonably well about its axis. Most disagreement appeared at obstacle edges, where slight translational motion and yaw variation can shift the angle at which an object is first detected. Since yaw was typically within a few degrees of the target, the dominant error in a centered scan of a 4 m by 4 m room would come from angular uncertainty and long-range ToF variance rather than large translational drift. I would therefore expect average map error to be around 0.1 to 0.15 m, while the worst-case error could become larger at far distances or sharp corners. A 0.3 m bound is a conservative upper limit, but it is likely larger than the typical error observed in practice.
+</p>
+
+<h3>Transformation and Polar-to-Cartesian Mapping</h3>
+<p>
+Data was then collected at each of the four designated points on the lab map. Each map data collection was plotted in polar coordinates to authenticate its accuracy before later data fusion was used to build the map boundaries. Two ToF sensors were used to increase the amount of data on the map and introduce independent measurements.
+</p>
+
+<span class="image fit">
+    <img src="images/lab9/polar.png" alt="Polar plots for the four scans" />
+</span>
+
+<p>
+In order to map, the raw ToF readings were transformed in Python from sensor-frame polar observations into inertial-frame Cartesian coordinates. Each ToF measurement began as a point along the local x-axis of its respective sensor frame, represented in homogeneous coordinates.
+</p>
+
+<span class="image fit">
+	<img src="images/lab9/cart.png" alt="Cartesian plots for the four scans" />
+</span>
+
+<p>
+The transformation chain then mapped this point from the sensor frame to the robot frame and finally from the robot frame to the inertial room frame. This was implemented using homogeneous transformation matrices of the form shown below.
+</p>
+
+<span class="image fit media-small">
+    <img src="images/lab9/T.png" alt="Homogeneous transform matrix" />
+</span>
+
+<div class="media-row">
+    <span class="image fit media-small">
+        <img src="images/lab9/offset.png" alt="Sensor offsets on robot frame" />
+    </span>
+</div>
+
+<p>
+This framework made it straightforward to account for a forward-facing sensor and a right-facing sensor with different offsets. The four scan locations were first transformed separately in the inertial frame, then merged together to create a unified map representation.
+</p>
+
+<span class="image fit">
+    <img src="images/lab9/map.png" alt="Merged sensor map" />
+</span>
+
+<p>
+After fusing the four scans, manual wall segments were added to match the known environment and convert the sparse point cloud into an interpretable map outline.
+</p>
+
+<span class="image fit">
+    <img src="images/lab9/wall_map.png" alt="Final mapped walls overlaid on sensor data" />
+</span>
+
+<p>
+This produced the following lists comprising the wall information.
+</p>
+
+<div class="media-row">
+    <span class="image fit media-small">
+        <img src="images/lab9/wall_starts.png" alt="Wall start points" />
+    </span>
+    <span class="image fit media-small">
+        <img src="images/lab9/wall_ends.png" alt="Wall end points" />
+    </span>
+</div>
+
+<h3>Results and Discussion</h3>
+<p>
+The mapping approach produced a genuinely accurate reconstruction of the provided map. The most important success was not perfect geometric precision, but rather the ability to recover major wall structure from a limited number of angular samples. The main sources of error were yaw bias, heading overshoot, sensor offset uncertainty, and occasional long-range ToF returns. These effects manifested as shifted or slightly curved wall clusters in the transformed plot. Even so, the discrete settle-and-sample strategy substantially improved map clarity compared with sampling during continuous turning.
+</p>
+
+<h3>Acknowledgements</h3>
+<p>
+I would like to acknowledge the course staff and TAs for providing the lab framework. I would also like to acknowledge that ChatGPT was used to convert this report into HTML format, in addition to support matplotlib function development for making plots more detailed.
+</p>
+
+<ul class="buttons">
+    <li><a href="#page-wrapper" class="button small scrolly">Back to Top</a></li>
+    <li><a href="index.html" class="button small">Back to Lab Reports</a></li>
+</ul>
+
+</section>
+</div>
+</section>
+
+</article>
+
+<footer id="footer">
+    <ul class="copyright">
+        <li>&copy; Connor Lynaugh</li>
+        <li>Design: HTML5 UP</li>
+    </ul>
+</footer>
+
+</div>
+
+<script src="assets/js/jquery.min.js"></script>
+<script src="assets/js/main.js"></script>
+
+</body>
+</html>
