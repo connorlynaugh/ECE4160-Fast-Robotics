@@ -1,0 +1,303 @@
+html_content = r"""<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Lab 10 - Grid Localization using Bayes Filter</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.65;
+            margin: 0;
+            padding: 0;
+            background: #f8f9fb;
+            color: #222;
+        }
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: white;
+            padding: 48px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            border-radius: 16px;
+        }
+        h1, h2, h3 {
+            color: #111;
+        }
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.2em;
+        }
+        h2 {
+            margin-top: 2.2em;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 0.35em;
+        }
+        p {
+            margin: 1em 0;
+        }
+        code {
+            background: #f1f3f5;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-family: "Courier New", monospace;
+            font-size: 0.95em;
+        }
+        pre {
+            background: #111827;
+            color: #f9fafb;
+            padding: 18px;
+            border-radius: 12px;
+            overflow-x: auto;
+            font-size: 0.92em;
+            line-height: 1.5;
+        }
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 850px;
+            margin: 24px auto;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 14px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+        .subtitle {
+            color: #555;
+            margin-top: 0;
+        }
+        ul {
+            margin-top: 0.5em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Lab 10: Grid Localization using Bayes Filter</h1>
+        <p class="subtitle">ECE 4160/5160 Fast Robots</p>
+
+        <h2>Introduction</h2>
+        <p>
+            In this lab, I implemented grid localization using a Bayes filter. The main idea was to estimate
+            the robot’s pose probabilistically instead of relying on raw odometry, since odometry alone drifts
+            over time. The robot state is represented as <code>(x, y, θ)</code>, and the continuous map is discretized
+            into a <code>12 × 9 × 18</code> grid. Each cell stores the probability that the robot is in that state,
+            and the full set of probabilities forms the robot’s belief. The Bayes filter then updates that belief
+            over time using a prediction step based on motion and an update step based on sensor data.
+        </p>
+
+        <p>
+            The overall goal of this lab was to use noisy odometry and 18 range measurements taken during a full
+            rotation to keep the estimated pose close to the robot’s ground truth pose. The key parts of the
+            implementation were computing the odometry control input, evaluating the odometry motion model,
+            generating the prior belief in the prediction step, and then correcting it in the update step using
+            the observation likelihoods.
+        </p>
+
+        <h2>Algorithm Implementation</h2>
+        <p>
+            I followed the standard Bayes filter structure and implemented five main functions:
+            <code>compute_control()</code>, <code>odom_motion_model()</code>, <code>prediction_step()</code>,
+            <code>sensor_model()</code>, and <code>update_step()</code>.
+        </p>
+
+        <h3>Compute Control</h3>
+        <p>
+            This function computes the motion command between two poses in the form of first rotation, translation,
+            and second rotation. I normalized both rotations so the angles stay in the correct range.
+        </p>
+<pre><code>def compute_control(cur_pose, prev_pose):
+    """ Given the current and previous odometry poses, this function extracts
+    the control information based on the odometry motion model.
+
+    Args:
+        cur_pose  ([Pose]): Current Pose
+        prev_pose ([Pose]): Previous Pose 
+
+    Returns:
+        [delta_rot_1]: Rotation 1  (degrees)
+        [delta_trans]: Translation (meters)
+        [delta_rot_2]: Rotation 2  (degrees)
+    """
+
+    x_diff = cur_pose[0] - prev_pose[0]
+    y_diff = cur_pose[1] - prev_pose[1]
+
+    delta_rot_1 = np.degrees(math.atan2(y_diff,x_diff)) - prev_pose[2]
+    delta_trans = math.sqrt(x_diff**2 + y_diff**2)
+    delta_rot_2 = cur_pose[2] - prev_pose[2] - delta_rot_1
+    
+    return mapper.normalize_angle(delta_rot_1), delta_trans, mapper.normalize_angle(delta_rot_2)</code></pre>
+
+        <h3>Odometry Motion Model</h3>
+        <p>
+            This function evaluates how likely a state transition is by comparing a candidate motion to the
+            actual measured control input using Gaussian models.
+        </p>
+<pre><code>def odom_motion_model(cur_pose, prev_pose, u):
+    """ Odometry Motion Model
+
+    Args:
+        cur_pose  ([Pose]): Current Pose
+        prev_pose ([Pose]): Previous Pose
+        (rot1, trans, rot2) (float, float, float): A tuple with control data in the format 
+                                                   format (rot1, trans, rot2) with units (degrees, meters, degrees)
+
+    Returns:
+        prob [float]: Probability p(x'|x, u)
+    """
+
+    delta_rot_1, delta_trans, delta_rot_2 = compute_control(cur_pose, prev_pose)
+
+    prob_rot_1 = loc.gaussian(delta_rot_1, u[0], loc.odom_rot_sigma)
+    prob_trans = loc.gaussian(delta_trans, u[1], loc.odom_trans_sigma)
+    prob_rot_2 = loc.gaussian(delta_rot_2, u[2], loc.odom_rot_sigma)
+
+    prob = prob_rot_1 * prob_trans * prob_rot_2
+    return prob</code></pre>
+
+        <h3>Prediction Step</h3>
+        <p>
+            The prediction step builds the prior belief <code>bel_bar</code> by looping over all possible previous
+            and next states. I added a threshold so states with belief below <code>0.0001</code> are skipped,
+            which reduced the computation time while keeping the result effectively the same after normalization.
+        </p>
+<pre><code>def prediction_step(cur_odom, prev_odom):
+    """ Prediction step of the Bayes Filter.
+    Update the probabilities in loc.bel_bar based on loc.bel from the previous time step and the odometry motion model.
+
+    Args:
+        cur_odom  ([Pose]): Current Pose
+        prev_odom ([Pose]): Previous Pose
+    """
+
+    loc.bel_bar = np.zeros((mapper.MAX_CELLS_X, mapper.MAX_CELLS_Y, mapper.MAX_CELLS_A))
+    
+    # Get motion model
+    u = compute_control(cur_odom, prev_odom)
+
+    # Loop over each possible form cell to to cell combination within probaility threshold
+    for x_cell in range(mapper.MAX_CELLS_X):
+        for y_cell in range(mapper.MAX_CELLS_Y):
+            for t_cell in range(mapper.MAX_CELLS_A):
+                prev_bel = loc.bel[x_cell,y_cell,t_cell]
+                # Threshold previous probaility
+                if prev_bel >= 0.0001:
+                    cell_pose = mapper.from_map(x_cell, y_cell, t_cell)
+                    for to_x in range(mapper.MAX_CELLS_X):
+                        for to_y in range(mapper.MAX_CELLS_Y):
+                            for to_t in range(mapper.MAX_CELLS_A):
+                                to_pose = mapper.from_map(to_x, to_y, to_t)
+                                # Get probability and update belief
+                                prob = odom_motion_model(to_pose, cell_pose, u)
+                                loc.bel_bar[to_x, to_y, to_t] += prob * prev_bel
+    
+    # Normalize
+    loc.bel_bar = loc.bel_bar / np.sum(loc.bel_bar)</code></pre>
+
+        <h3>Sensor Model</h3>
+        <p>
+            The sensor model compares the expected observation at a pose to the robot’s actual 18-measurement scan
+            and returns the individual Gaussian likelihoods.
+        </p>
+<pre><code>def sensor_model(obs):
+    """ This is the equivalent of p(z|x).
+
+    Args:
+        obs ([ndarray]): A 1D array consisting of the true observations for a specific robot pose in the map 
+
+    Returns:
+        [ndarray]: Returns a 1D array of size 18 (=loc.OBS_PER_CELL) with the likelihoods of each individual sensor measurement
+    """
+
+    prob_array = np.zeros(mapper.OBS_PER_CELL)
+
+    for i in range(mapper.OBS_PER_CELL):
+        prob_array[i] = loc.gaussian(obs[i], loc.obs_range_data[i,0], loc.sensor_sigma)
+
+    return prob_array</code></pre>
+
+        <h3>Update Step</h3>
+        <p>
+            The update step multiplies the prior belief by the full measurement likelihood and then normalizes the
+            resulting belief grid.
+        </p>
+<pre><code>def update_step():
+    """ Update step of the Bayes Filter.
+    Update the probabilities in loc.bel based on loc.bel_bar and the sensor model.
+    """
+
+    for x_cell in range(mapper.MAX_CELLS_X):
+        for y_cell in range(mapper.MAX_CELLS_Y):
+            for t_cell in range(mapper.MAX_CELLS_A):
+                prob = np.prod(sensor_model(mapper.get_views(x_cell,y_cell,t_cell)))
+                loc.bel[x_cell,y_cell,t_cell] = prob * loc.bel_bar[x_cell,y_cell,t_cell]
+
+    # Normalize
+    loc.bel = loc.bel / np.sum(loc.bel)</code></pre>
+
+        <h2>Results and Analysis</h2>
+        <p>
+            From my results, the Bayes filter performed much better than odometry alone. The prediction step by
+            itself still had noticeable uncertainty, which makes sense because it only uses noisy motion information.
+            Once the update step was applied, the belief became much more concentrated around the correct pose.
+            This showed that the sensor update was doing the critical correction work and keeping the estimate from
+            drifting too far away from the ground truth.
+        </p>
+
+        <p>
+            A pattern I noticed was that localization worked better when the robot was near walls or other strong
+            map features. In those regions, the range readings are more distinct, so the filter can more confidently
+            separate one state from another. In more open parts of the map, multiple poses can produce similar
+            measurements, so the estimate becomes a little less precise. That matched what I expected, since the
+            update step is only as strong as the information contained in the sensor measurements.
+        </p>
+
+        <p>
+            I also think the threshold in the prediction step was important. Since the grid has 1944 states, the
+            full previous-to-current transition calculation is computationally expensive in Python. Skipping states
+            with very low prior probability made the code much more practical while still preserving the overall
+            behavior of the belief after normalization.
+        </p>
+
+        <h2>Simulation Video</h2>
+        <p>
+            The following video demonstrates the simulation trajectory, the depth observations, and the live Bayes
+            filter localization process:
+        </p>
+
+        <div class="video-container">
+            <iframe src="https://www.youtube-nocookie.com/embed/BADFP9GI7yw?rel=0&modestbranding=1&playsinline=1"
+                    title="Lab 10 Simulation Video"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>
+        </div>
+
+        <h2>Conclusion</h2>
+        <p>
+            Overall, this lab showed how much stronger probabilistic localization is than simple odometry tracking.
+            My implementation used the Bayes filter to combine motion and sensor information, and the update step
+            consistently corrected the drift introduced by prediction alone. The final result was a belief distribution
+            that generally stayed close to the robot’s true state, especially in parts of the map with stronger
+            geometric features. This was a good simulation-based introduction to localization before moving on to
+            applying similar ideas on the real robot.
+        </p>
+    </div>
+</body>
+</html>
+"""
+
+path = "/mnt/data/lab10_report.html"
+with open(path, "w", encoding="utf-8") as f:
+    f.write(html_content)
+
+print(path)
