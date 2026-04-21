@@ -1,122 +1,113 @@
-html_content = r"""<!DOCTYPE HTML>
+<!DOCTYPE HTML>
 <html>
 <head>
-    <title>Lab 10 - Grid Localization using Bayes Filter</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.65;
-            margin: 0;
-            padding: 0;
-            background: #f8f9fb;
-            color: #222;
-        }
-        .container {
-            max-width: 900px;
-            margin: 40px auto;
-            background: white;
-            padding: 48px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-            border-radius: 16px;
-        }
-        h1, h2, h3 {
-            color: #111;
-        }
-        h1 {
-            font-size: 2.2rem;
-            margin-bottom: 0.2em;
-        }
-        h2 {
-            margin-top: 2.2em;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 0.35em;
-        }
-        p {
-            margin: 1em 0;
-        }
-        code {
-            background: #f1f3f5;
-            padding: 2px 6px;
-            border-radius: 6px;
-            font-family: "Courier New", monospace;
-            font-size: 0.95em;
-        }
-        pre {
-            background: #111827;
-            color: #f9fafb;
-            padding: 18px;
-            border-radius: 12px;
-            overflow-x: auto;
-            font-size: 0.92em;
-            line-height: 1.5;
-        }
-        .video-container {
-            position: relative;
-            width: 100%;
-            max-width: 850px;
-            margin: 24px auto;
-            padding-bottom: 56.25%;
-            height: 0;
-            overflow: hidden;
-            border-radius: 14px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-        }
-        .video-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: 0;
-        }
-        .subtitle {
-            color: #555;
-            margin-top: 0;
-        }
-        ul {
-            margin-top: 0.5em;
-        }
-    </style>
+	<title>Lab 10 - ECE4160 Fast Robotics Spring 2026</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<link rel="stylesheet" href="assets/css/main.css" />
+	<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+
+<style>
+:root{
+	--media-gap: 1.25rem;
+	--media-bottom: 2.25rem;
+	--section-gap: 3rem;
+	--page-max: 100%;
+	--media-max: 760px;
+	--media-small-max: 500px;
+}
+
+#main .content h3 {
+	font-size: 2.0em;
+	font-weight: 800;
+	margin-top: var(--section-gap);
+}
+
+span.image.fit{
+	display:block;
+	width:100%;
+	max-width: var(--media-max);
+	margin: var(--media-gap) auto var(--media-bottom) auto;
+}
+
+span.image.fit img {
+	width:100%;
+	height:auto;
+}
+
+span.image.fit.media-small { max-width: var(--media-small-max); }
+
+.media-row {
+	display:flex;
+	flex-wrap:wrap;
+	gap:1rem;
+	justify-content:center;
+}
+
+pre {
+	overflow-x: auto;
+}
+
+iframe {
+	max-width: 100%;
+}
+</style>
 </head>
-<body>
-    <div class="container">
-        <h1>Lab 10: Grid Localization using Bayes Filter</h1>
-        <p class="subtitle">ECE 4160/5160 Fast Robots</p>
 
-        <h2>Introduction</h2>
-        <p>
-            In this lab, I implemented grid localization using a Bayes filter. The main idea was to estimate
-            the robot’s pose probabilistically instead of relying on raw odometry, since odometry alone drifts
-            over time. The robot state is represented as <code>(x, y, θ)</code>, and the continuous map is discretized
-            into a <code>12 × 9 × 18</code> grid. Each cell stores the probability that the robot is in that state,
-            and the full set of probabilities forms the robot’s belief. The Bayes filter then updates that belief
-            over time using a prediction step based on motion and an update step based on sensor data.
-        </p>
+<body class="no-sidebar is-preload">
+<div id="page-wrapper">
 
-        <p>
-            The overall goal of this lab was to use noisy odometry and 18 range measurements taken during a full
-            rotation to keep the estimated pose close to the robot’s ground truth pose. The key parts of the
-            implementation were computing the odometry control input, evaluating the odometry motion model,
-            generating the prior belief in the prediction step, and then correcting it in the update step using
-            the observation likelihoods.
-        </p>
+<header id="header">
+	<h1 id="logo"><a href="index.html">Fast Robotics <span>Spring 2026</span></a></h1>
+	<nav id="nav">
+		<ul>
+			<li><a href="index.html">Welcome</a></li>
+			<li><a href="lab6.html">Lab 6</a></li>
+			<li><a href="lab7.html">Lab 7</a></li>
+			<li><a href="lab8.html">Lab 8</a></li>
+			<li><a href="lab9.html">Lab 9</a></li>
+			<li class="current"><a href="lab10.html">Lab 10</a></li>
+		</ul>
+	</nav>
+</header>
 
-        <h2>Algorithm Implementation</h2>
-        <p>
-            I followed the standard Bayes filter structure and implemented five main functions:
-            <code>compute_control()</code>, <code>odom_motion_model()</code>, <code>prediction_step()</code>,
-            <code>sensor_model()</code>, and <code>update_step()</code>.
-        </p>
+<article id="main">
 
-        <h3>Compute Control</h3>
-        <p>
-            This function computes the motion command between two poses in the form of first rotation, translation,
-            and second rotation. I normalized both rotations so the angles stay in the correct range.
-        </p>
+<header class="special container">
+	<span class="icon solid fa-robot"></span>
+	<h2><strong>Lab 10: Grid Localization using Bayes Filter</strong></h2>
+	<p>ECE4160 Fast Robotics — Spring 2026<br />Connor Lynaugh</p>
+</header>
+
+<section class="wrapper style4 container">
+<div class="content">
+<section>
+
+<h3>Overview</h3>
+<p>
+The objective of this lab was to implement grid localization using a Bayes Filter in simulation. Rather than trusting odometry alone, the robot maintains a probabilistic belief over its pose and continuously refines that belief using both motion updates and depth observations. The robot state is represented as (x, y, θ), and the continuous map is discretized into a 12 × 9 × 18 grid over position and orientation. Each grid cell stores the probability that the robot is in that state, and the full belief distribution is updated at each iteration of the filter.
+</p>
+
+<p>
+This lab was mainly about putting the Bayes Filter pipeline together cleanly and understanding what each step was doing. The prediction step spreads belief forward using the odometry motion model, while the update step sharpens that belief again using the 18 depth observations collected during a full scan. In practice, this meant balancing correctness with computation time, since even a modest grid still leads to a large number of possible state transitions.
+</p>
+
+<h3>Bayes Filter Structure</h3>
+<p>
+The full Bayes Filter alternates between prediction and update. Prediction uses the previous belief and the measured control input to estimate where the robot could have moved. Update then compares the robot’s actual observation against the expected observations for every grid cell and boosts the states that best match the sensor data.
+</p>
+
+<p>
+In this lab, the filter worked over a fully discretized belief grid. That means the most likely robot pose at any moment is just the cell with the highest probability after normalization. The entire implementation was built around five core functions: <code>compute_control()</code>, <code>odom_motion_model()</code>, <code>prediction_step()</code>, <code>sensor_model()</code>, and <code>update_step()</code>.
+</p>
+
+<h3>Compute Control</h3>
+<p>
+The first step was extracting the odometry control input between two poses in the form of rotation, translation, and final rotation. I normalized the angular components so that all comparisons stayed within the expected heading range.
+</p>
+
 <pre><code>def compute_control(cur_pose, prev_pose):
-    """ Given the current and previous odometry poses, this function extracts
+    &quot;&quot;&quot; Given the current and previous odometry poses, this function extracts
     the control information based on the odometry motion model.
 
     Args:
@@ -127,7 +118,7 @@ html_content = r"""<!DOCTYPE HTML>
         [delta_rot_1]: Rotation 1  (degrees)
         [delta_trans]: Translation (meters)
         [delta_rot_2]: Rotation 2  (degrees)
-    """
+    &quot;&quot;&quot;
 
     x_diff = cur_pose[0] - prev_pose[0]
     y_diff = cur_pose[1] - prev_pose[1]
@@ -138,13 +129,13 @@ html_content = r"""<!DOCTYPE HTML>
     
     return mapper.normalize_angle(delta_rot_1), delta_trans, mapper.normalize_angle(delta_rot_2)</code></pre>
 
-        <h3>Odometry Motion Model</h3>
-        <p>
-            This function evaluates how likely a state transition is by comparing a candidate motion to the
-            actual measured control input using Gaussian models.
-        </p>
+<h3>Odometry Motion Model</h3>
+<p>
+Once the control tuple was available, I used Gaussian models to score how likely a state transition was under that motion. This function compares the motion needed to move from one pose to another against the actual control input measured from odometry.
+</p>
+
 <pre><code>def odom_motion_model(cur_pose, prev_pose, u):
-    """ Odometry Motion Model
+    &quot;&quot;&quot; Odometry Motion Model
 
     Args:
         cur_pose  ([Pose]): Current Pose
@@ -154,7 +145,7 @@ html_content = r"""<!DOCTYPE HTML>
 
     Returns:
         prob [float]: Probability p(x'|x, u)
-    """
+    &quot;&quot;&quot;
 
     delta_rot_1, delta_trans, delta_rot_2 = compute_control(cur_pose, prev_pose)
 
@@ -165,20 +156,19 @@ html_content = r"""<!DOCTYPE HTML>
     prob = prob_rot_1 * prob_trans * prob_rot_2
     return prob</code></pre>
 
-        <h3>Prediction Step</h3>
-        <p>
-            The prediction step builds the prior belief <code>bel_bar</code> by looping over all possible previous
-            and next states. I added a threshold so states with belief below <code>0.0001</code> are skipped,
-            which reduced the computation time while keeping the result effectively the same after normalization.
-        </p>
+<h3>Prediction Step</h3>
+<p>
+The prediction step builds the prior belief <code>bel_bar</code>. This is where the computational cost shows up, because the code has to consider many previous-to-current state transitions. To reduce unnecessary work, I ignored prior states whose probability was below 0.0001. That threshold helped a lot with runtime while still keeping the dominant probability mass intact after normalization.
+</p>
+
 <pre><code>def prediction_step(cur_odom, prev_odom):
-    """ Prediction step of the Bayes Filter.
+    &quot;&quot;&quot; Prediction step of the Bayes Filter.
     Update the probabilities in loc.bel_bar based on loc.bel from the previous time step and the odometry motion model.
 
     Args:
         cur_odom  ([Pose]): Current Pose
         prev_odom ([Pose]): Previous Pose
-    """
+    &quot;&quot;&quot;
 
     loc.bel_bar = np.zeros((mapper.MAX_CELLS_X, mapper.MAX_CELLS_Y, mapper.MAX_CELLS_A))
     
@@ -191,7 +181,7 @@ html_content = r"""<!DOCTYPE HTML>
             for t_cell in range(mapper.MAX_CELLS_A):
                 prev_bel = loc.bel[x_cell,y_cell,t_cell]
                 # Threshold previous probaility
-                if prev_bel >= 0.0001:
+                if prev_bel &gt;= 0.0001:
                     cell_pose = mapper.from_map(x_cell, y_cell, t_cell)
                     for to_x in range(mapper.MAX_CELLS_X):
                         for to_y in range(mapper.MAX_CELLS_Y):
@@ -204,20 +194,20 @@ html_content = r"""<!DOCTYPE HTML>
     # Normalize
     loc.bel_bar = loc.bel_bar / np.sum(loc.bel_bar)</code></pre>
 
-        <h3>Sensor Model</h3>
-        <p>
-            The sensor model compares the expected observation at a pose to the robot’s actual 18-measurement scan
-            and returns the individual Gaussian likelihoods.
-        </p>
+<h3>Sensor Model</h3>
+<p>
+The sensor model compares the expected observations for a grid cell against the actual range data measured by the robot. Since each scan contains 18 individual observations, I computed the per-measurement Gaussian likelihoods and returned them as an array.
+</p>
+
 <pre><code>def sensor_model(obs):
-    """ This is the equivalent of p(z|x).
+    &quot;&quot;&quot; This is the equivalent of p(z|x).
 
     Args:
         obs ([ndarray]): A 1D array consisting of the true observations for a specific robot pose in the map 
 
     Returns:
         [ndarray]: Returns a 1D array of size 18 (=loc.OBS_PER_CELL) with the likelihoods of each individual sensor measurement
-    """
+    &quot;&quot;&quot;
 
     prob_array = np.zeros(mapper.OBS_PER_CELL)
 
@@ -226,15 +216,15 @@ html_content = r"""<!DOCTYPE HTML>
 
     return prob_array</code></pre>
 
-        <h3>Update Step</h3>
-        <p>
-            The update step multiplies the prior belief by the full measurement likelihood and then normalizes the
-            resulting belief grid.
-        </p>
+<h3>Update Step</h3>
+<p>
+The update step multiplies the prior belief by the full observation likelihood for each state. Since the scan contains 18 depth values, I took the product of the 18 individual sensor probabilities and used that to weight <code>bel_bar</code>. After that, I normalized the final belief again.
+</p>
+
 <pre><code>def update_step():
-    """ Update step of the Bayes Filter.
+    &quot;&quot;&quot; Update step of the Bayes Filter.
     Update the probabilities in loc.bel based on loc.bel_bar and the sensor model.
-    """
+    &quot;&quot;&quot;
 
     for x_cell in range(mapper.MAX_CELLS_X):
         for y_cell in range(mapper.MAX_CELLS_Y):
@@ -245,59 +235,60 @@ html_content = r"""<!DOCTYPE HTML>
     # Normalize
     loc.bel = loc.bel / np.sum(loc.bel)</code></pre>
 
-        <h2>Results and Analysis</h2>
-        <p>
-            From my results, the Bayes filter performed much better than odometry alone. The prediction step by
-            itself still had noticeable uncertainty, which makes sense because it only uses noisy motion information.
-            Once the update step was applied, the belief became much more concentrated around the correct pose.
-            This showed that the sensor update was doing the critical correction work and keeping the estimate from
-            drifting too far away from the ground truth.
-        </p>
+<h3>Results and Analysis</h3>
+<p>
+From my simulation results, the Bayes Filter clearly outperformed odometry alone. The prediction step spread the belief in a way that made sense, but it still carried noticeable uncertainty since it only depended on noisy motion estimates. After the update step, the belief often collapsed much more tightly around the correct region of the map. That was the main takeaway of the lab: the motion model gives a reasonable prior, but the sensor update is what actually keeps the estimate anchored.
+</p>
 
-        <p>
-            A pattern I noticed was that localization worked better when the robot was near walls or other strong
-            map features. In those regions, the range readings are more distinct, so the filter can more confidently
-            separate one state from another. In more open parts of the map, multiple poses can produce similar
-            measurements, so the estimate becomes a little less precise. That matched what I expected, since the
-            update step is only as strong as the information contained in the sensor measurements.
-        </p>
+<p>
+I also noticed that the localization worked best near walls and corners, where the depth observations were more unique. In those parts of the map, the update step had a much easier time separating one state from another. In more open regions, several grid cells could produce similar observations, so the filter had less information to confidently choose between them. That made the estimate slightly less sharp in the center of the environment.
+</p>
 
-        <p>
-            I also think the threshold in the prediction step was important. Since the grid has 1944 states, the
-            full previous-to-current transition calculation is computationally expensive in Python. Skipping states
-            with very low prior probability made the code much more practical while still preserving the overall
-            behavior of the belief after normalization.
-        </p>
+<p>
+Another practical takeaway was runtime. Even though the grid is not huge, the full prediction step still becomes expensive quickly when all state combinations are considered. The probability threshold in my prediction loop was important for making the implementation usable without changing the basic logic of the Bayes Filter.
+</p>
 
-        <h2>Simulation Video</h2>
-        <p>
-            The following video demonstrates the simulation trajectory, the depth observations, and the live Bayes
-            filter localization process:
-        </p>
+<h3>Simulation Video</h3>
+<p>
+The following video demonstrates the simulation trajectory, depth observations, and the Bayes Filter running live throughout the localization process.
+</p>
 
-        <div class="video-container">
-            <iframe src="https://www.youtube-nocookie.com/embed/BADFP9GI7yw?rel=0&modestbranding=1&playsinline=1"
-                    title="Lab 10 Simulation Video"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowfullscreen></iframe>
-        </div>
+<div class="media-row">
+	<iframe width="700" height="394" src="https://www.youtube-nocookie.com/embed/BADFP9GI7yw?rel=0&amp;modestbranding=1&amp;playsinline=1" title="Lab 10 Bayes Filter Simulation" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
 
-        <h2>Conclusion</h2>
-        <p>
-            Overall, this lab showed how much stronger probabilistic localization is than simple odometry tracking.
-            My implementation used the Bayes filter to combine motion and sensor information, and the update step
-            consistently corrected the drift introduced by prediction alone. The final result was a belief distribution
-            that generally stayed close to the robot’s true state, especially in parts of the map with stronger
-            geometric features. This was a good simulation-based introduction to localization before moving on to
-            applying similar ideas on the real robot.
-        </p>
-    </div>
+<h3>Conclusion</h3>
+<p>
+Overall, this lab was a good demonstration of why probabilistic localization is necessary. Odometry alone was not reliable enough, but once the robot combined motion information with range observations using a Bayes Filter, the state estimate became much more stable and meaningful. The final implementation showed that even with a relatively coarse grid, the robot could localize well enough to stay close to ground truth, especially when it had strong sensor information from surrounding walls.
+</p>
+
+<h3>Acknowledgements</h3>
+<p>
+I would like to thank the teaching staff for persistent help and oversight. I would also like to credit ChatGPT for helping answer Bayes Filter implementation questions and for converting my written lab report into a functional html page.
+</p>
+
+<ul class="buttons">
+	<li><a href="#page-wrapper" class="button small scrolly">Back to Top</a></li>
+	<li><a href="index.html" class="button small">Back to Lab Reports</a></li>
+</ul>
+
+</section>
+</div>
+</section>
+
+</article>
+
+<footer id="footer">
+	<ul class="copyright">
+		<li>&copy; Connor Lynaugh</li>
+		<li>Design: HTML5 UP</li>
+	</ul>
+</footer>
+
+</div>
+
+<script src="assets/js/jquery.min.js"></script>
+<script src="assets/js/main.js"></script>
+
 </body>
 </html>
-"""
-
-path = "/mnt/data/lab10_report.html"
-with open(path, "w", encoding="utf-8") as f:
-    f.write(html_content)
-
-print(path)
