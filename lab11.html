@@ -1,0 +1,260 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Lab 11 - ECE4160 Fast Robotics Spring 2026</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<link rel="stylesheet" href="assets/css/main.css" />
+	<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+
+<style>
+:root{
+	--media-gap: 1.25rem;
+	--media-bottom: 2.25rem;
+	--section-gap: 3rem;
+	--page-max: 100%;
+	--media-max: 650px;
+	--media-small-max: 400px;
+}
+
+#main .content h3 {
+	font-size: 2.0em;
+	font-weight: 800;
+	margin-top: var(--section-gap);
+}
+
+#main .content h4 {
+	font-size: 1.35em;
+	font-weight: 800;
+	margin-top: 2.25rem;
+}
+
+span.image.fit{
+	display:block;
+	width:100%;
+	max-width: var(--media-max);
+	margin: var(--media-gap) auto var(--media-bottom) auto;
+}
+
+span.image.fit img {
+	width:100%;
+	height:auto;
+}
+
+span.image.fit.media-small { max-width: var(--media-small-max); }
+
+.media-row {
+	display:flex;
+	flex-wrap:wrap;
+	gap:1rem;
+	justify-content:center;
+	margin: var(--media-gap) auto var(--media-bottom) auto;
+}
+
+pre {
+	overflow-x: auto;
+}
+</style>
+</head>
+
+<body class="no-sidebar is-preload">
+<div id="page-wrapper">
+
+<header id="header">
+	<h1 id="logo"><a href="index.html">Fast Robotics <span>Spring 2026</span></a></h1>
+	<nav id="nav">
+		<ul>
+			<li><a href="index.html">Welcome</a></li>
+			<li><a href="lab10.html">Lab 10</a></li>
+			<li class="current"><a href="lab11.html">Lab 11</a></li>
+		</ul>
+	</nav>
+</header>
+
+<article id="main">
+
+<header class="special container">
+	<span class="icon solid fa-robot"></span>
+	<h2><strong>Lab 11: Grid Localization using Bayes Filter in the Real World</strong></h2>
+	<p>ECE4160 Fast Robotics — Spring 2026<br />Connor Lynaugh</p>
+</header>
+
+<section class="wrapper style4 container">
+<div class="content">
+<section>
+
+<h3>Overview</h3>
+<p>
+Lab 11 implements grid localization using a Bayes Filter, performing simulation on a local device and sharing the measurement results over Bluetooth. The provided Lab 11 Jupyter notebook was used in combination with a collection of previous Bluetooth files to implement this function.
+</p>
+
+<h3>Simulation</h3>
+<p>
+The first step of this lab was to verify that the simulation script, <code>lab11sym.ipynb</code>, was correctly functioning on my local device. The complete grid localization script can be seen plotted and printed below.
+</p>
+
+<span class="image fit">
+	<img src="images/lab11/simulation.png" alt="Lab 11 grid localization simulation plot" />
+</span>
+
+<p>
+The green line represents the robot’s ground truth, the red line represents the location data derived from odometry, and the blue line represents the location data derived from the Bayes filter. The grayscale grid tiles represent the final distribution of probabilities where the robot may be, with whiter tiles representing higher probabilities. Given this plot, the Bayes filter is substantially more reliable than the odometry, staying within the map and tracking the ground truth with only a little uncertainty throughout the movement. This matches the findings from Lab 10.
+</p>
+
+<h3>Real World Localization</h3>
+<p>
+In this lab, instead of relying on the noisy and unreliable odometry data, only depth/ToF measurement steps were used to update a Bayes filter for localization. The Arduino function <code>MAP</code> from Lab 9 was retrofitted to spin the robot in place, collecting 18 measurements at each 20 degree yaw using only the front time-of-flight sensor.
+</p>
+
+<span class="image fit">
+	<img src="images/lab11/mapArd.png" alt="Arduino MAP case for Lab 11 observation collection" />
+</span>
+
+<p>
+The implementation of the map case can be found in the Lab 9 report. The only adaptation is the above change, the array of angles, and the size of entries. Note that the angles are negative so that the robot turns in the counterclockwise direction.
+</p>
+
+<p>
+Additionally, new PID tuning was required. The following parameters were found to efficiently and accurately track each intended angle with little overshoot. The matching graph corresponds to the robot’s accuracy turning in place.
+</p>
+
+<span class="image fit">
+	<img src="images/lab11/pid.png" alt="PID tuning values for Lab 11 orientation control" />
+</span>
+
+<span class="image fit">
+	<img src="images/lab11/orientation.png" alt="Orientation tracking graph during Lab 11 mapping routine" />
+</span>
+
+<p>
+After the robot settles within 1 degree of the intended angle for more than 500 ms, the forward distance to the nearest wall is collected on TOF1. Once the 18 measurements are collected, the robot uses the <code>SEND_MAP</code> case to pass all measurements and their corresponding headings to the Bayes filter on my local device, where Lab 9’s notification handler receives them. For additional information, please refer to Lab 9’s page.
+</p>
+
+<p>
+The Python function <code>perform_observation_loop</code> calls the relevant Bluetooth commands discussed above to collect the measurements, modify their structure into usable forms, and then pass them to the Bayes Filter update step.
+</p>
+
+<span class="image fit">
+	<img src="images/lab11/code.png" alt="Python perform_observation_loop code for Lab 11" />
+</span>
+
+<p>
+This function calls the <code>MAP</code> command with the necessary PID parameters before setting up the notification handler and requesting the measurements over Bluetooth using the <code>SEND_MAP</code> command. ToF measurements are divided by 1000 to change units into meters, as expected for the provided Bayes Filter. The sensor headings are trimmed to cut the last measurement, which is an additional 0 degree measurement provided to complete a full rotation for debugging purposes. They are also negated to match counterclockwise rotation, and the modulus with 360 is used to correctly wrap any oversized measurements. The transpose is taken of both data arrays in order to provide vertical data arrays as expected by the provided Bayes Filter.
+</p>
+
+<p>
+A helper function <code>sleep_n_secs</code> was used to asynchronously pause the Python simulation while the robot collects and sends measurements in real time. This was executed using <code>asyncio.run</code> to ensure sleep only blocks the running kernel and not any necessary Bluetooth communication.
+</p>
+
+<span class="image fit">
+	<img src="images/lab11/sleep.png" alt="Async sleep helper function for Lab 11 observation loop" />
+</span>
+
+<h3>Testing</h3>
+<p>
+Localization was tested using the same four points of <code>(-3,-2)</code>, <code>(0,3)</code>, <code>(5,3)</code>, and <code>(5,-3)</code> from Lab 9. For each one, I ran the localization a few times to ensure the results were consistent. Note that the above points are described in measurements of feet, whereas the simulation and its grid coordinates are in meters.
+</p>
+
+<h4>Point (5,3)</h4>
+
+<div class="media-row">
+	<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/DqJpAKOdqmU?rel=0&amp;modestbranding=1&amp;playsinline=1" title="Lab 11 localization at point (5,3)" frameborder="0" allowfullscreen></iframe>
+</div>
+
+<span class="image fit">
+	<img src="images/lab11/rightMap.png" alt="Localization map result at point (5,3)" />
+</span>
+
+<span class="image fit">
+	<img src="images/lab11/rightData.png" alt="Depth observation data at point (5,3)" />
+</span>
+
+<p>
+Point <code>(5,3)</code> was alright at localizing. Localization would consistently converge to the correct x coordinate, but with a consistent y drift downwards. I suspect that this location is the most prone to ToF sensor error, given that it has many nearby walls, especially the center box, while the sensor is configured to its <code>longDistanceMode</code> and many walls are too far to detect reliably. One of the worst runs can be found below.
+</p>
+
+<span class="image fit">
+	<img src="images/lab11/badRight.png" alt="Worst localization run at point (5,3)" />
+</span>
+
+<h4>Point (0,3)</h4>
+
+<span class="image fit">
+	<img src="images/lab11/topMap.png" alt="Localization map result at point (0,3)" />
+</span>
+
+<span class="image fit">
+	<img src="images/lab11/topData.png" alt="Depth observation data at point (0,3)" />
+</span>
+
+<p>
+Point <code>(0,3)</code> was great at localizing. This point had many unique walls visible from the center of the map, none of which were too close or too far for accurate sensor readings.
+</p>
+
+<h4>Point (-3,-2)</h4>
+
+<span class="image fit">
+	<img src="images/lab11/leftMap.png" alt="Localization map result at point (-3,-2)" />
+</span>
+
+<span class="image fit">
+	<img src="images/lab11/leftData.png" alt="Depth observation data at point (-3,-2)" />
+</span>
+
+<p>
+Point <code>(-3,-2)</code> was also great at localizing. This point had consistent distance readings after its first couple of readings down the open corridor, which helped the localization belief converge.
+</p>
+
+<h4>Point (5,-3)</h4>
+
+<span class="image fit">
+	<img src="images/lab11/bottomMap.png" alt="Localization map result at point (5,-3)" />
+</span>
+
+<span class="image fit">
+	<img src="images/lab11/bottomData.png" alt="Depth observation data at point (5,-3)" />
+</span>
+
+<p>
+Point <code>(5,-3)</code> was also alright at localizing. The point was surrounded by long walls on its two sides and unique walls across from these, helping localization converge. However, the outer walls were too close and created considerable noise along a number of its distance measurements. The following illustrates one of its worst runs.
+</p>
+
+<span class="image fit">
+	<img src="images/lab11/badBottom.png" alt="Worst localization run at point (5,-3)" />
+</span>
+
+<h3>Conclusion</h3>
+<p>
+The grid localization performed best when the batteries were fully charged and several iterations were conducted. Grid locations where the ToF sensor had several objects at the desired range of the long distance mode, around 4 m, performed the best, whereas locations with close walls and large gaps performed less reliably. My first few runs suffered from variables in the map changing, such as human movement and adjacent robots, in addition to a lower charged battery which required a higher proportional PID value.
+</p>
+
+<h3>References</h3>
+<p>
+I referred to Aidan Derocher’s website from last year for this project, and used ChatGPT to transform this report into an HTML file.
+</p>
+
+<ul class="buttons">
+	<li><a href="#page-wrapper" class="button small scrolly">Back to Top</a></li>
+	<li><a href="index.html" class="button small">Back to Lab Reports</a></li>
+</ul>
+
+</section>
+</div>
+</section>
+
+</article>
+
+<footer id="footer">
+	<ul class="copyright">
+		<li>&copy; Connor Lynaugh</li>
+		<li>Design: HTML5 UP</li>
+	</ul>
+</footer>
+
+</div>
+
+<script src="assets/js/jquery.min.js"></script>
+<script src="assets/js/main.js"></script>
+
+</body>
+</html>
