@@ -16,264 +16,368 @@
 			/* Responsive video embed */
 			.video-wrap {
 				position: relative;
-				padding-bottom: 56.25%; /* 16:9 */
+				padding-bottom: 56.25%;
 				height: 0;
 				overflow: hidden;
 				border-radius: 0.75rem;
 				box-shadow: 0 0.5rem 1.25rem rgba(0,0,0,0.12);
-				margin: 1rem 0;
+				margin: 1.5rem 0;
 			}
+
 			.video-wrap iframe {
 				position: absolute;
-				top: 0; left: 0;
+				top: 0;
+				left: 0;
 				width: 100%;
 				height: 100%;
 				border: 0;
 			}
+
+			figure.image.featured {
+				margin: 1.5rem 0;
+			}
+
+			figure.image.featured img {
+				width: 100%;
+				height: auto;
+				border-radius: 0.5rem;
+				box-shadow: 0 0.5rem 1.25rem rgba(0,0,0,0.12);
+			}
+
+			figure.image.featured figcaption {
+				font-size: 0.9rem;
+				color: #666;
+				text-align: center;
+				margin-top: 0.5rem;
+				font-style: italic;
+			}
+
+			video.image.featured {
+				width: 100%;
+				height: auto;
+				border-radius: 0.5rem;
+				box-shadow: 0 0.5rem 1.25rem rgba(0,0,0,0.12);
+				margin: 1.5rem 0;
+			}
 		</style>
 	</head>
+
 	<body class="no-sidebar is-preload">
 		<div id="page-wrapper">
 
 			<!-- Header -->
-				<header id="header">
-					<h1 id="logo"><a href="index.html">Connor Lynaugh <span>Lab Reports</span></a></h1>
-					<nav id="nav">
-						<ul>
-							<li><a href="index.html">Home</a></li>
-							<li class="current"><a href="lab2.html">Lab 2 – IMU</a></li>
-							<li><a href="contact.html">Contact</a></li>
-						</ul>
-					</nav>
-				</header>
+			<header id="header">
+				<h1 id="logo"><a href="index.html">Connor Lynaugh <span>Lab Reports</span></a></h1>
+				<nav id="nav">
+					<ul>
+						<li><a href="index.html">Home</a></li>
+						<li class="current"><a href="lab2.html">Lab 2 – IMU</a></li>
+						<li><a href="contact.html">Contact</a></li>
+					</ul>
+				</nav>
+			</header>
 
 			<!-- Main -->
-				<article id="main">
+			<article id="main">
 
-					<header class="special container">
-						<span class="icon solid fa-compass"></span>
-						<h2><strong>Lab 2 – IMU</strong></h2>
-					</header>
+				<header class="special container">
+					<span class="icon solid fa-compass"></span>
+					<h2><strong>Lab 2 – IMU</strong></h2>
+				</header>
 
-					<section class="wrapper style4 container">
-						<div class="content">
-							<section>
+				<section class="wrapper style4 container">
+					<div class="content">
+						<section>
 
-								<h3>Lab 2 – IMU</h3>
+							<h3>Lab 2 – IMU</h3>
 
-								<p>[Picture of IMU attached]</p>
-								<a href="#" class="image featured">
-									<img src="images/lab2/IMU_ATTACHED.HEIC" alt="" />
-								</a>
+							<h3>Objective</h3>
+							<p>
+								The goal of this lab was to integrate the ICM-20948 IMU with the Artemis Nano and start collecting data on the car’s orientation
+								using both accelerometer and gyroscope data. By combining sensor data and applying filters we are supposed to build a stable movement
+								model that can be communicated over Bluetooth.
+							</p>
 
-								<h3>Objective</h3>
-								<p>
-									The goal of this lab was to integrate the ICM-20948 IMU with the Artemis Nano and start collecting data on the car’s orientation
-									using both accelerometer and gyroscope data. By combining sensor data and applying filters we are supposed to build a stable movement
-									model that can be communicated over bluetooth.
-								</p>
+							<h3>Setting up the IMU</h3>
+							<p>
+								The AD0_VAL in the Basic SparkFun Example dictates the least significant bit of the IMU’s I2C address and should be set to 1, which is default.
+							</p>
 
-								<h3>Setting up the IMU</h3>
-								<p>
-									The AD0_VAL in the Basic Sparkfun Example dictates the least significant bit of the UMU’s I2C address and should be set to 1 which is default.
-								</p>
+							<p>
+								When moving the IMU, acceleration changes along the noted axes on the board, with gravity constantly applying acceleration towards the ground.
+								If only moved in translational directions there are no gyroscope readings. The gyroscope only picks up rotational movements which rotate about
+								the noted axes on the board. Similarly, rotational movements do not affect the accelerometer readings apart from the constant gravity.
+							</p>
 
-								<p>
-									When moving the IMU, acceleration changes along the noted axes on the board, with gravity constantly applying acceleration towards the ground.
-									If only moved in translational directions there are no gyroscope readings. The gyroscope only picks up rotational movements which rotate about
-									the noted axes on the board. Similarly rotational movements do not affect the accelerometer readings apart from the constant gravity.
-								</p>
+							<div class="video-wrap">
+								<iframe
+									src="https://www.youtube.com/embed/ooh6CDsbfic?rel=0&modestbranding=1"
+									title="IMU moving with data"
+									allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+									allowfullscreen>
+								</iframe>
+							</div>
 
-								<p>[Video of IMU moving with data]</p>
-								<div class="video-wrap">
-									<iframe
-										src="https://www.youtube.com/embed/ooh6CDsbfic?rel=0&modestbranding=1"
-										title="IMU moving with data"
-										allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-										allowfullscreen>
-									</iframe>
-								</div>
+							<p>
+								To help with visual debugging I added a function which runs in the board setup and flashes the on-board LED three times before entering the main loop function.
+							</p>
 
-								<p>
-									To help with visual debugging I added a function which runs in the board setup which flashes the on-board LED three times before entering the main loop function.
-								</p>
+							<h3>Accelerometer</h3>
 
-								<h3>Accelerometer</h3>
-								<p>
-									Using the equations from lecture I calculated pitch and roll using the accelerometer data in each axis. The trigonometric formulation uses atan2 to remain numerically stable across quadrants:
-								</p>
+							<p>
+								Using the equations from lecture I calculated pitch and roll using the accelerometer data in each axis.
+								The trigonometric formulation uses atan2 to remain numerically stable across quadrants:
+							</p>
 
-								<pre><code>pitch = atan2(accX, accZ) * 180/M_PI;
+							<pre><code>pitch = atan2(accX, accZ) * 180/M_PI;
 roll  = atan2(accY, accZ) * 180/M_PI;</code></pre>
 
-								<p>[Video of IMU moving pitch and roll from 90 0 -90 degrees on computer edge]</p>
-								<div class="video-wrap">
-									<iframe
-										src="https://www.youtube.com/embed/7YLllTBXNOc?rel=0&modestbranding=1"
-										title="Pitch and roll 90 0 -90 degrees"
-										allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-										allowfullscreen>
-									</iframe>
-								</div>
+							<div class="video-wrap">
+								<iframe
+									src="https://www.youtube.com/embed/7YLllTBXNOc?rel=0&modestbranding=1"
+									title="Pitch and roll 90 0 -90 degrees"
+									allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+									allowfullscreen>
+								</iframe>
+							</div>
 
-								<p>
-									As shown in the video the accelerometer is able to quickly follow the changes in acceleration and when stabilized accurately display a large acceleration towards the direction of gravity.
-								</p>
+							<p>
+								As shown in the video, the accelerometer is able to quickly follow changes in acceleration and, when stabilized,
+								accurately display a large acceleration in the direction of gravity.
+							</p>
 
-								<p>
-									A python script was written to both parse and plot the data arrays sent from the Artemis over bluetooth and is illustrated later in this report. The arrays sent for the accelerometer include time, pitch, and roll. An array size of 2000 accurately encompassed 6-8 seconds of data.
-								</p>
+							<p>
+								A Python script was written to parse and plot the data arrays sent from the Artemis over Bluetooth. The arrays sent
+								for the accelerometer include time, pitch, and roll. An array size of 2000 accurately encompassed about 6-8 seconds
+								of data.
+							</p>
 
-								<p>
-									The accelerometer showed overall good accuracy in all axes during repeated runs. The bias between a positive axis and a negative one was not substantial nor consistent on reboot so two point calibration was not required.
-								</p>
+							<p>
+								The accelerometer showed overall good accuracy in all axes during repeated runs. The bias between a positive axis and
+								a negative one was not substantial or consistent on reboot, so two point calibration was not required.
+							</p>
 
-								<p>
-									To test the noise levels of the IMU the car motors were driven in its proximity and vibrations were induced on the testing table. The resulting noise levels were notably high across the whole spectrum once the data was analyzed in the frequency domain.
-								</p>
+							<p>
+								To test the noise levels of the IMU, the car motors were driven in its proximity and vibrations were induced on the
+								testing table. The resulting noise levels were notably high across the whole spectrum once the data was analyzed in
+								the frequency domain.
+							</p>
 
-								<p>[Insert image of fft noise]</p>
-								<a href="#" class="image featured">
-									<img src="images/lab2/ACCEL_FFT" alt="" />
-								</a>
+							<figure class="image featured">
+								<img src="images/lab2/ACCEL_FFT.png" alt="Accelerometer FFT noise analysis" />
+								<figcaption>Frequency-domain analysis of accelerometer noise before filtering.</figcaption>
+							</figure>
 
-								<p>
-									Looking closely there is a noticeable frequency component from zero (of course) but also the frequencies up to 5Hz. This can be seen most clearly in the Pitch Fast Fourier Transform graph. Thus, 5Hz was set as the cutoff frequency to keep some accelerometer responsiveness while also filtering out the high frequency noise. The following equations from class were then used to find an alpha of 0.0982, corresponding to my sampling rate of 288.66 Hz.
-								</p>
+							<p>
+								To better understand the accelerometer noise, I analyzed the recorded pitch and roll data in the frequency domain
+								using a Fast Fourier Transform. This made it easier to separate useful motion from vibration, motor noise, and general
+								sensor noise. The FFT showed that most of the useful accelerometer behavior was concentrated at low frequencies,
+								especially below approximately 5 Hz. Higher-frequency components were less representative of the actual orientation
+								of the car and more likely came from mechanical vibration and electrical noise.
+							</p>
 
-								<p>[Insert alpha equation] [insert cutoff frequency equation]</p>
-								<a href="#" class="image featured">
-									<img src="images/lab2/ALPHA" alt="" />
-								</a>
-								<a href="#" class="image featured">
-									<img src="images/lab2/F_CUT" alt="" />
-								</a>
+							<p>
+								Because of this, I chose a cutoff frequency of 5 Hz for the low-pass filter. This cutoff was a compromise between
+								smoothness and responsiveness. A lower cutoff frequency would remove more noise, but it would also make the
+								accelerometer angle respond too slowly to real movement. A higher cutoff frequency would make the signal more
+								responsive, but would allow more vibration and noise to remain in the data. Since the robot’s orientation changes
+								occur relatively slowly compared to the vibration noise, 5 Hz provided a reasonable balance.
+							</p>
 
-								<p>
-									Upon implementing the low pass filter the accelerometer data is substantially less noisy and has a cleaner frequency domain, though some persistent noise still exists.
-								</p>
+							<figure class="image featured">
+								<img src="images/lab2/ALPHA.png" alt="Low-pass filter alpha equation" />
+								<figcaption>Alpha calculation used for the accelerometer low-pass filter.</figcaption>
+							</figure>
 
-								<p>
-									It is worth noting that the IMU board features an integrated “Digital Motion Processor” that runs its own algorithms on sensor feedback before passing the data to the Artemis board.
-								</p>
+							<figure class="image featured">
+								<img src="images/lab2/F_CUT.png" alt="Cutoff frequency equation" />
+								<figcaption>Cutoff frequency relationship used to design the low-pass filter.</figcaption>
+							</figure>
 
-								<h3>Gyroscope</h3>
-								<p>
-									The equations for calculating pitch, roll, and yaw angles from the gyroscope use integration over time following this equation:
-								</p>
+							<p>
+								Using my measured sampling rate of approximately 288.66 Hz, this cutoff frequency produced an alpha value of 0.0982.
+								In the filter implementation, each new filtered value is calculated as a weighted combination of the previous filtered
+								value and the newest accelerometer reading. This means that sudden spikes in the accelerometer data have less influence
+								on the final output, while consistent long-term changes in orientation are still preserved.
+							</p>
 
-								<pre><code>dt = (micros()-last_time)/1000000;
+							<pre><code>filtered_pitch = alpha * pitch + (1 - alpha) * previous_filtered_pitch;
+filtered_roll  = alpha * roll  + (1 - alpha) * previous_filtered_roll;</code></pre>
+
+							<p>
+								After applying the low-pass filter, the accelerometer data became significantly smoother in the time domain and showed
+								reduced high-frequency content in the frequency domain. Some noise still remained, but the filtered signal was much
+								better suited for use in the complementary filter.
+							</p>
+
+							<figure class="image featured">
+								<img src="images/lab2/ACCEL_FILTER_DATA.png" alt="Filtered accelerometer data" />
+								<figcaption>Filtered accelerometer pitch and roll data after applying the low-pass filter.</figcaption>
+							</figure>
+
+							<p>
+								It is worth noting that the IMU board features an integrated Digital Motion Processor, or DMP, that can run its own
+								algorithms on sensor feedback before passing the data to the Artemis board. However, for this portion of the lab I
+								filtered the raw accelerometer-based pitch and roll values directly so that I could understand the effect of the
+								low-pass filter on the measured signal.
+							</p>
+
+							<h3>Gyroscope</h3>
+							<p>
+								The equations for calculating pitch, roll, and yaw angles from the gyroscope use integration over time following this equation:
+							</p>
+
+							<pre><code>dt = (micros() - last_time) / 1000000;
 angle += gyro_rate * dt;</code></pre>
 
-								<p>This was applied to all three gyroscope axes to create the following reading.</p>
-								<p>[insert raw gyro reading]</p>
-								<a href="#" class="image featured">
-									<img src="images/lab2/GYRO_READ" alt="" />
-								</a>
+							<p>
+								This was applied to all three gyroscope axes to create the following reading.
+							</p>
 
-								<p>
-									The gyroscope provides smooth motion tracking and can handle fast changes well, but because it relies on additive integration any and all small errors increase in size over time. When compared to the accelerometer which does not experience any drifting bias, the accelerometer is much more susceptible to vibrational and environmental noise. Thus, the accelerometer provides long term absolute orientation with the help of gravity and the gyroscope provides smooth tracking and accurate short term tracking.
-								</p>
+							<figure class="image featured">
+								<img src="images/lab2/GYRO_READ.png" alt="Raw gyroscope reading" />
+								<figcaption>Raw gyroscope angle data generated through integration.</figcaption>
+							</figure>
 
-								<p>[insert raw gyro vs accelerometer]</p>
-								<a href="#" class="image featured">
-									<img src="images/lab2/GYRO_DATA_ALONE" alt="" />
-								</a>
-								<a href="#" class="image featured">
-									<img src="images/lab2/ACCEL_FILTER_DATA" alt="" />
-								</a>
+							<p>
+								The gyroscope provides smooth motion tracking and can handle fast changes well, but because it relies on additive integration
+								any and all small errors increase in size over time. When compared to the accelerometer which does not experience any drifting bias,
+								the accelerometer is much more susceptible to vibrational and environmental noise. Thus, the accelerometer provides long term absolute
+								orientation with the help of gravity and the gyroscope provides smooth tracking and accurate short term tracking.
+							</p>
 
-								<p>
-									The sampling rate directly impacts the gyroscope integration quality because smaller steps provide higher resolution. When sampling is slow, each update covers a large time delta so any bias or noise encountered in this period is magnified in the sample. On the flip side as sampling is fast, time delta decreases and integration becomes smoother and more stable.
-								</p>
+							<figure class="image featured">
+								<img src="images/lab2/GYRO_DATA_ALONE.png" alt="Gyroscope data alone" />
+								<figcaption>Gyroscope-only pitch, roll, and yaw data.</figcaption>
+							</figure>
 
-								<p>To combine strengths of both sensors I apply a complimentary filter as follows:</p>
-								<pre><code>angle = (1-alpha)(prev_angle + gyro_delta) + alpha*(accel_angle)</code></pre>
+							<figure class="image featured">
+								<img src="images/lab2/ACCEL_FILTER_DATA.png" alt="Filtered accelerometer data" />
+								<figcaption>Filtered accelerometer pitch and roll data used for comparison with the gyroscope.</figcaption>
+							</figure>
 
-								<p>
-									Because my sampling rate is generally high in the range of 250-350 Hz the gyroscope actually provides the most accurate data in the near term and thus I chose to essentially weigh it at 95% with an alpha of 0.05. This means the accelerometer only lightly contributes to the total trend, but consistently counters the long term drift. With this combination the complimentary filter is able to accurately chase both stable and sporadic movements, though it does experience some lag in terms of updating.
-								</p>
+							<p>
+								The sampling rate directly impacts the gyroscope integration quality because smaller steps provide higher resolution. When sampling is slow,
+								each update covers a large time delta so any bias or noise encountered in this period is magnified in the sample. On the flip side, as sampling
+								is fast, time delta decreases and integration becomes smoother and more stable.
+							</p>
 
-								<p>[insert stationary comp filter]</p>
-								<a href="#" class="image featured">
-									<img src="images/lab2/COMP_STATION" alt="" />
-								</a>
+							<p>
+								To combine strengths of both sensors I apply a complimentary filter as follows:
+							</p>
 
-								<p>
-									While stationary the complimentary filter is able to most accurately model the lack of movement in comparison to both the filtered accelerometer and the raw gyroscope data. While moving it is also able to accurately track the changes, most notably in the roll graph where the primary movement was occurring about the axis.
-								</p>
+							<pre><code>angle = (1 - alpha) * (prev_angle + gyro_delta) + alpha * accel_angle;</code></pre>
 
-								<p>[insert mobile comp filter]</p>
-								<a href="#" class="image featured">
-									<img src="images/lab2/COMP_MOVE" alt="" />
-								</a>
+							<p>
+								Because my sampling rate is generally high in the range of 250-350 Hz the gyroscope actually provides the most accurate data in the near term
+								and thus I chose to essentially weigh it at 95% with an alpha of 0.05. This means the accelerometer only lightly contributes to the total trend,
+								but consistently counters the long term drift. With this combination the complimentary filter is able to accurately chase both stable and sporadic
+								movements, though it does experience some lag in terms of updating.
+							</p>
 
-								<h3>Sample Data Collection</h3>
+							<figure class="image featured">
+								<img src="images/lab2/COMP_STATION.png" alt="Complementary filter while stationary" />
+								<figcaption>Complementary filter output while the IMU was stationary.</figcaption>
+							</figure>
 
-								<h4>Loop optimization</h4>
-								<p>
-									In order to increase the sampling rate I removed any delay, print, or busy wait functions to prevent unnecessary time gates. The data is stored in a predefined data array of floats. I chose a size of 2000 elements to appropriately capture over 5 seconds of data with leeway for starting and ending a motion. The IMU data collection and the bluetooth data transmit were both moved into the main loop as opposed to a specific case using data flags. So now the GET_ACC_GYRO case just resets flags as appropriate to enable the data collection in main. With these changes the mean sampling rate became 275Hz and the median was 333.3Hz, an improvement from before. At this point the IMU refresh rate is a limiting factor as the loop to collect data depends on the IMU registering containing new and available data.
-								</p>
+							<p>
+								While stationary the complimentary filter is able to most accurately model the lack of movement in comparison to both the filtered accelerometer
+								and the raw gyroscope data. While moving it is also able to accurately track the changes, most notably in the roll graph where the primary movement
+								was occurring about the axis.
+							</p>
 
-								<p>
-									In order to store data into the arrays my code first checks to see if there is new available data. If there is, it records the current time in microseconds and uses the previous time to calculate the time delta for the gyroscope integration. Gyroscope pitch roll and yaw are then respectively calculated and then stored into the respective array at the correct index. Simultaneously, the time stamp is saved using milliseconds and the data for the accelerometer’s pitch and roll are calculated and stored respectively. Then the IMU array index is incremented and the loop will wait until the data function is called again and data is available. If the data arrays are full the flag for data collection is lowered and the flag for data transmission is raised handing off responsibilities to a transmit function in the main loop.
-								</p>
+							<figure class="image featured">
+								<img src="images/lab2/COMP_MOVE.png" alt="Complementary filter while moving" />
+								<figcaption>Complementary filter output while the IMU was moving.</figcaption>
+							</figure>
 
-								<p>
-									The transmit function behaves very similarly to those in previous labs involving clearing the transmit string data, appending new information, and then finally writing the finished value. This occurs in a loop through each index as it is iterated each time and finishes upon completing the array.
-								</p>
+							<h3>Sample Data Collection</h3>
 
-								<p>[insert final data]</p>
-								<a href="#" class="image featured">
-									<img src="images/lab2/FIVE_SEC" alt="" />
-								</a>
+							<h4>Loop optimization</h4>
+							<p>
+								In order to increase the sampling rate I removed any delay, print, or busy wait functions to prevent unnecessary time gates. The data is stored in
+								a predefined data array of floats. I chose a size of 2000 elements to appropriately capture over 5 seconds of data with leeway for starting and ending
+								a motion. The IMU data collection and the bluetooth data transmit were both moved into the main loop as opposed to a specific case using data flags.
+								So now the GET_ACC_GYRO case just resets flags as appropriate to enable the data collection in main. With these changes the mean sampling rate became
+								275Hz and the median was 333.3Hz, an improvement from before. At this point the IMU refresh rate is a limiting factor as the loop to collect data
+								depends on the IMU registering containing new and available data.
+							</p>
 
-								<p>
-									The float type was chosen for the data arrays given that the IMU outputs decimal numbers and because they take up half of the space as a double. This also provided sufficient precision for the car’s needs.
-								</p>
+							<p>
+								In order to store data into the arrays my code first checks to see if there is new available data. If there is, it records the current time in
+								microseconds and uses the previous time to calculate the time delta for the gyroscope integration. Gyroscope pitch roll and yaw are then respectively
+								calculated and then stored into the respective array at the correct index. Simultaneously, the time stamp is saved using milliseconds and the data
+								for the accelerometer’s pitch and roll are calculated and stored respectively. Then the IMU array index is incremented and the loop will wait until
+								the data function is called again and data is available. If the data arrays are full the flag for data collection is lowered and the flag for data
+								transmission is raised handing off responsibilities to a transmit function in the main loop.
+							</p>
 
-								<p>
-									The Artemis Nano has about 384 kB of RAM available and each IMU sample as designed in my lab consists of six values: time, accelerometer pitch, accelerometer roll, gyroscope pitch, gyroscope roll, and gyroscope yaw. Each of these values are stored as 4 byte floats meaning each time sample has 24 bytes of data. At the measured sampling rate of 275Hz, the Artemis could store approximately 60 full seconds of data.
-								</p>
+							<p>
+								The transmit function behaves very similarly to those in previous labs involving clearing the transmit string data, appending new information,
+								and then finally writing the finished value. This occurs in a loop through each index as it is iterated each time and finishes upon completing the array.
+							</p>
 
-								<h3>RC Car Stunt</h3>
-								<p>[insert stunt video]</p>
+							<figure class="image featured">
+								<img src="images/lab2/FIVE_SEC.png" alt="Five seconds of IMU data collection" />
+								<figcaption>Five-second IMU data collection showing accelerometer and gyroscope behavior.</figcaption>
+							</figure>
 
-								<p>
-									After playing around with the car I discovered that driving the car quickly forward or backward and suddenly switching directions provided reliable torque that could flip the vehicle over to the underside. This is the stunt that I chose to record in my demonstration.
-								</p>
+							<p>
+								The float type was chosen for the data arrays given that the IMU outputs decimal numbers and because they take up half of the space as a double.
+								This also provided sufficient precision for the car’s needs.
+							</p>
 
-							</section>
-						</div>
-					</section>
+							<p>
+								The Artemis Nano has about 384 kB of RAM available and each IMU sample as designed in my lab consists of six values: time, accelerometer pitch,
+								accelerometer roll, gyroscope pitch, gyroscope roll, and gyroscope yaw. Each of these values are stored as 4 byte floats meaning each time sample
+								has 24 bytes of data. At the measured sampling rate of 275Hz, the Artemis could store approximately 60 full seconds of data.
+							</p>
 
-				</article>
+							<h3>RC Car Stunt</h3>
+
+							<div class="video-wrap">
+								<iframe
+									src="https://www.youtube.com/embed/oGVJvEMVTyA?rel=0&modestbranding=1"
+									title="RC car stunt demonstration"
+									allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+									allowfullscreen>
+								</iframe>
+							</div>
+
+							<p>
+								After playing around with the car I discovered that driving the car quickly forward or backward and suddenly switching directions provided reliable
+								torque that could flip the vehicle over to the underside. This is the stunt that I chose to record in my demonstration.
+							</p>
+
+						</section>
+					</div>
+				</section>
+
+			</article>
 
 			<!-- Footer -->
-				<footer id="footer">
+			<footer id="footer">
+				<ul class="icons">
+					<li><a href="#" class="icon brands circle fa-github"><span class="label">Github</span></a></li>
+				</ul>
 
-					<ul class="icons">
-						<li><a href="#" class="icon brands circle fa-github"><span class="label">Github</span></a></li>
-					</ul>
-
-					<ul class="copyright">
-						<li>&copy; Untitled</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
-					</ul>
-
-				</footer>
+				<ul class="copyright">
+					<li>&copy; Untitled</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+				</ul>
+			</footer>
 
 		</div>
 
 		<!-- Scripts -->
-			<script src="assets/js/jquery.min.js"></script>
-			<script src="assets/js/jquery.dropotron.min.js"></script>
-			<script src="assets/js/jquery.scrolly.min.js"></script>
-			<script src="assets/js/jquery.scrollgress.min.js"></script>
-			<script src="assets/js/jquery.scrollex.min.js"></script>
-			<script src="assets/js/browser.min.js"></script>
-			<script src="assets/js/breakpoints.min.js"></script>
-			<script src="assets/js/util.js"></script>
-			<script src="assets/js/main.js"></script>
+		<script src="assets/js/jquery.min.js"></script>
+		<script src="assets/js/jquery.dropotron.min.js"></script>
+		<script src="assets/js/jquery.scrolly.min.js"></script>
+		<script src="assets/js/jquery.scrollgress.min.js"></script>
+		<script src="assets/js/jquery.scrollex.min.js"></script>
+		<script src="assets/js/browser.min.js"></script>
+		<script src="assets/js/breakpoints.min.js"></script>
+		<script src="assets/js/util.js"></script>
+		<script src="assets/js/main.js"></script>
 
 	</body>
 </html>
